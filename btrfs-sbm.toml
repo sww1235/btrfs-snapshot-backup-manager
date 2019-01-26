@@ -1,0 +1,12 @@
+# main config file
+
+# table of tables
+[configs]
+
+# default config table of a single subvolume config
+[configs.default]
+
+name = ""
+path = ""
+keep-hourly = 5
+keep-daily = 5
