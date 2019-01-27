@@ -17,17 +17,6 @@ def take_snapshot(src, dest, ro):
     else:
         subprocess.run(["btrfs", "snapshot", src, dest])
 
-def createconfig(subvolume_path):
-    """Initializes subvolume backups"""
-    # init
-    # add subvolume to config table
-    # create .shapshots directory
-    # create first snapshot
-    # btrfs snapshot [-r] <source> <dest>|[<dest>/]<name>
-    #subvolume_name = os.path.basename(os.path.normpath(subvolume_path))
-    now = datetime.datetime.now()
-    # btrfs snapshot -r /path/to/subvolume/ /path/to/subvolume/.shapshots
-    take_snapshot(subvolume_path, os.path.join(subvolume, ".shapshots", subvolume_name + now.isoformat()), true)
 
 # first thing, read command line options
 
@@ -47,14 +36,33 @@ parser.add_argument('--sysconfig-dir', action='store', help= "changes sysconfig 
 parser.add_argument('--version',action='version',version=__version__ )
 args = parser.parse_args()
 
-main_config_file_path = os.path.join(args.sysconfig-dir,"btrfs-sbm.toml"
+main_config_file_path = os.path.join(args.sysconfig_dir,"btrfs-sbm.toml"
 
-config = toml.load(main_config_file_path)
+# read config file
+main_config = toml.load(main_config_file_path)
+
+log_Path = main_config['log-path']
+
+# main command select
+if args.list_configs:
+    fmt_string = "{name:<10}|{path:<20}"
+    print(fmt_string).format(name="Config",path="Subvolume Path")
+    print(fmt_string).format(name="----------",path="--------------------")
+    for subvol in main_config['configs']: # subvol is dict representing individual config
+        print(fmt_string).format(name=subvol[name],path=subvol[path])
+elif args.create_config != "":
+    """Initializes subvolume backups"""
+    now = datetime.datetime.now()
+    subvolume_name = os.path.basename(os.path.normpath(subvolume_path))
+    main_config['configs'].append()
+
+    # add subvolume to config table
+    # create .shapshots directory
+    # create first snapshot
+    # btrfs snapshot [-r] <source> <dest>|[<dest>/]<name>
+    # btrfs snapshot -r /path/to/subvolume/ /path/to/subvolume/.shapshots
+    take_snapshot(subvolume_path, os.path.join(subvolume, ".shapshots", subvolume_name + now.isoformat()), true)
 
 
-
-
-
-
-
-toml.dump(config, main_config_file_path)
+# dump config file
+toml.dump(main_config, main_config_file_path)
