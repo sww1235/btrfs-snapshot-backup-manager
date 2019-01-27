@@ -1,9 +1,9 @@
 # main config file
 
+log-path = "/var/log/btrfs-sbm.log"
+
 # table of tables
 [configs]
-
-log-path = "/var/log/btrfs-sbm.log"
 
 # default config table of a single subvolume config
 [configs.default]
