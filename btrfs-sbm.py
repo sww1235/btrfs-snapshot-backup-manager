@@ -39,6 +39,7 @@ args = parser.parse_args()
 main_config_file_path = os.path.join(args.sysconfig_dir,"btrfs-sbm.toml"
 
 # read config file
+# TODO: need to make sure file and path exist first
 main_config = toml.load(main_config_file_path)
 
 log_Path = main_config['log-path']
@@ -54,7 +55,7 @@ elif args.create_config != "":
     """Initializes subvolume backups"""
     now = datetime.datetime.now()
     subvolume_name = os.path.basename(os.path.normpath(subvolume_path))
-    main_config['configs'].append()
+    main_config['configs']
 
     # add subvolume to config table
     # create .shapshots directory
