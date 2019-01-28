@@ -55,7 +55,7 @@ action_group.add_argument('--delete-config', action = 'store', metavar="config-n
 parser.add_argument('--delete-snapshots', action = 'store_true', default=False, help="combine with --delete-config to delete snapshot directory, does nothing by itself")
 action_group.add_argument('--show-config', action = 'store', metavar="config-name", help="prints configuration for specific subvolume")
 action_group.add_argument('--edit-config', action = 'store', metavar="config-name", help="prompts to change values configuration for specific subvolume")
-parser.add_argument('--sysconfig-dir', action='store', help= "changes sysconfig directory",default=os.path.join("/","etc", "conf.d"))
+parser.add_argument('--sysconfig-dir', action='store', metavar="/path/to/configfile", help= "changes sysconfig directory",default=os.path.join("/","etc", "conf.d"))
 parser.add_argument('--version',action='version',version=__version__ )
 parser.add_argument('--log-level',action='store', default = "WARNING", help = "sets logging level")
 args = parser.parse_args()
