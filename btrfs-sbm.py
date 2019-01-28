@@ -28,6 +28,7 @@ def take_snapshot(src, dest, ro):
         subprocess.run(["btrfs", "subvolume", "snapshot", src, dest])
 
 
+
 # first thing, read command line options
 
 parser = argparse.ArgumentParser()
@@ -44,6 +45,7 @@ action_group.add_argument('--edit-config', action = 'store', help="prompts to ch
 parser.add_argument('--status', action = 'store_true', default=False, help="prints status")
 parser.add_argument('--sysconfig-dir', action='store', help= "changes sysconfig directory",default=os.path.join("/","etc", "conf.d"))
 parser.add_argument('--version',action='version',version=__version__ )
+parser.add_argument('--log-level',action='store', default = "WARNING", help = "sets logging level")
 args = parser.parse_args()
 
 main_config_file_path = os.path.join(args.sysconfig_dir,"btrfs-sbm.toml"
