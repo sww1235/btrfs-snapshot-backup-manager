@@ -165,5 +165,14 @@ elif args.create_config != "":
 elif args.delete_config != "":
     pass
 
-# dump config file
-toml.dump(main_config, main_config_file_path)
+
+if os.path.exists(main_config_file_path):
+    try:
+        f = open(main_config_file_path,'w')
+    except IOError:
+        logging.error("main config file did not exist at: " + main_config_file_path)
+        sys.exit(1)
+    toml.dump(main_config,f) # write config file
+else:
+    logging.critical("config file did not exist! Aborting")
+    sys.exit(1)
