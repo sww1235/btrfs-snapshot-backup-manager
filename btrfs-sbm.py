@@ -23,9 +23,9 @@ assert sys.version_info >= (3, 6) # make sure we are running with at least pytho
 def take_snapshot(src, dest, ro):
     """take btrfs snapshot"""
     if ro :
-        subprocess.run(["btrfs", "snapshot", "-r", src, dest])
+        subprocess.run(["btrfs", "subvolume", "snapshot", "-r", src, dest])
     else:
-        subprocess.run(["btrfs", "snapshot", src, dest])
+        subprocess.run(["btrfs", "subvolume", "snapshot", src, dest])
 
 
 # first thing, read command line options
