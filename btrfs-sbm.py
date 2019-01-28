@@ -121,6 +121,8 @@ elif args.create_config is not None:
 
         snapshot_name = subvolume_name + "-"+ now.isoformat()
 
+        snapshot_subvol_path = os.path.join(subvolume_path, snapshot_subvol_name)
+
         # add subvolume to config table
         if subvolume_name not in main_config['configs']:
             main_config['configs'][subvolume_name] = {} # init dicts
@@ -162,10 +164,10 @@ elif args.create_config is not None:
                 btrfs_create_subvolume(snapshot_subvol_path)
 
             # create first snapshot
-            btrfs_take_snapshot(subvolume_path, os.path.join(subvolume_path, ".snapshots", snapshot_name), True)
+            btrfs_take_snapshot(subvolume_path, os.path.join(snapshot_subvol_path, snapshot_name), True)
 
             main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['name'] = snapshot_name
-            main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['path'] = os.path.join(subvolume_path, ".snapshots", snapshot_name)
+            main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['path'] = os.path.join(subvolume_path, snapshot_subvol_name, snapshot_name)
             main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['creation-date-time'] = str(now.isoformat())
             main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['type'] = "init"
         else:
