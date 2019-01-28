@@ -110,7 +110,7 @@ if args.list_configs:
     for key, subvol in main_config['configs'].items(): # subvol is dict representing individual config
         print(fmt_string.format(name=subvol['name'],path=subvol['path']))
 
-elif args.create_config != "":
+elif args.create_config is not None:
     """Initializes subvolume backups"""
     subvolume_path = args.create_config
     if btrfs_subvolume_exists(subvolume_path):
@@ -173,7 +173,7 @@ elif args.create_config != "":
     else:
         print("{path} is not a btrfs subvolume. Make sure you typed it correctly")
         sys.exit(1)
-elif args.delete_config != "":
+elif args.delete_config is not None:
     pass
 
 
