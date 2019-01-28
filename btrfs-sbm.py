@@ -52,6 +52,16 @@ main_config_file_path = os.path.join(args.sysconfig_dir,"btrfs-sbm.toml")
 
 default_config_file_path = os.path.join(args.sysconfig_dir, "btrfs-sbm-default.toml")
 
+log_Path = os.path.join("/","var","log","btrfs-sbm.log")
+
+numeric_log_level = getattr(logging, args.log_level.upper(), None)
+if not isinstance(numeric_log_level, int):
+    raise ValueError('Invalid log level: %s' % args.log_level)
+    sys.exit(1)
+
+logging.basicConfig(filename = log_Path,level = numeric_log_level )
+logging.info("logging started")
+
 # read config file
 # TODO: need to make sure file and path exist first
 main_config = toml.load(main_config_file_path)
