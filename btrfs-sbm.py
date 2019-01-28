@@ -170,6 +170,7 @@ elif args.create_config is not None:
             main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['type'] = "init"
         else:
             print("subvolume config {config} already exists. Please use --show-config or --edit config instead".format(config=subvolume_name))
+            sys.exit(1)
     else:
         print("{path} is not a btrfs subvolume. Make sure you typed it correctly")
         sys.exit(1)
