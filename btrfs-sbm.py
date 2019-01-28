@@ -48,7 +48,9 @@ parser.add_argument('--version',action='version',version=__version__ )
 parser.add_argument('--log-level',action='store', default = "WARNING", help = "sets logging level")
 args = parser.parse_args()
 
-main_config_file_path = os.path.join(args.sysconfig_dir,"btrfs-sbm.toml"
+main_config_file_path = os.path.join(args.sysconfig_dir,"btrfs-sbm.toml")
+
+default_config_file_path = os.path.join(args.sysconfig_dir, "btrfs-sbm-default.toml")
 
 # read config file
 # TODO: need to make sure file and path exist first
