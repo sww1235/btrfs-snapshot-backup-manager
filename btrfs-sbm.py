@@ -139,7 +139,6 @@ elif args.create_config is not None:
                                 ".format(snapshot_type=config.split('-')[1],default=value))
                 except SyntaxError:
                     tmp = ""
-                print(tmp, type(tmp))
                 if tmp != "":
                     main_config['configs'][subvolume_name]['options'][config] = int(tmp)
                 else:
