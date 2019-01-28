@@ -28,15 +28,18 @@ def btrfs_take_snapshot(src, dest, ro):
         subprocess.run(["btrfs", "subvolume", "snapshot", src, dest])
 
 def btrfs_subvolume_exists(path):
-        return_val =subprocess.run(["btrfs", "subvolume", "show",path])
-        if return_val.returncode != 0:
-            return False
-        else: return True
+    """Checks if path is a btrfs subvolume"""
+    return_val =subprocess.run(["btrfs", "subvolume", "show",path])
+    if return_val.returncode != 0:
+        return False
+    else: return True
 
 def btrfs_create_subvolume(path):
+    """Creates a btrfs subvolume"""
     subprocess.run(["btrfs", "subvolume", "create", path])
 
 def btrfs_delete_subvolume(path):
+    """Deletes a btrfs subvolume"""
     subprocess.run(["btrfs", "subvolume", "delete", path])
 
 # first thing, read command line options
