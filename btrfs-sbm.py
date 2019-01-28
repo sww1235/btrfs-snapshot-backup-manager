@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
+"""
+Script for managing btrfs snapshots and backups with backblaze b2
+"""
 
 import toml
 import argparse
 import subprocess
 import os.path
+import sys
 import datetime
+import logging
+import shutil
 
 # external files
 # - log = /var/log/btrfs-sbm.log
