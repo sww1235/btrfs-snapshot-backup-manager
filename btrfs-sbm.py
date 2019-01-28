@@ -157,8 +157,9 @@ elif args.create_config != "":
                 else:
                     main_config['configs'][subvolume_name]['bkp-options'][config] = int(main_config['configs']['default']['bkp-options'][config])
 
-            # create .shapshots directory
-            btrfs_create_subvolume(os.path.join(subvolume_path, ".snapshots"))
+            # create .snapshots subvolume
+            if not btrfs_subvolume_exists(snapshot_subvol_path):
+                btrfs_create_subvolume(snapshot_subvol_path)
 
             # create first snapshot
             btrfs_take_snapshot(subvolume_path, os.path.join(subvolume_path, ".snapshots", snapshot_name), True)
