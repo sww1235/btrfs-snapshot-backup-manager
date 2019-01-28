@@ -62,11 +62,31 @@ if not isinstance(numeric_log_level, int):
 logging.basicConfig(filename = log_Path,level = numeric_log_level )
 logging.info("logging started")
 
-# read config file
-# TODO: need to make sure file and path exist first
-main_config = toml.load(main_config_file_path)
+main_config = {}
 
-log_Path = main_config['log-path']
+
+# try to read config file
+if os.path.exists(main_config_file_path) and os.path.exists(default_config_file_path):# both files exist
+    try:
+        f = open(main_config_file_path)
+    except IOError:
+        logging.error("main config file did not exist at: " + main_config_file_path)
+        sys.exit(1)
+    main_config = toml.load(f)
+elif os.path.exists(main_config_file_path) and not os.path.exists(default_config_file_path):
+    logging.info("default config file does not exist: creating now")
+    shutil.copy2(main_config_file_path, default_config_file_path) # preserve default config file with comments
+    try:
+        f = open(main_config_file_path)
+    except IOError:
+        logging.error("main config file did not exist at: " + main_config_file_path)
+        sys.exit(1)
+    main_config = toml.load(f)
+else:
+    logging.critical("config file did not exist! Aborting")
+    sys.exit(1)
+
+
 
 # main command select
 if args.list_configs:
