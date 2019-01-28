@@ -197,6 +197,15 @@ elif args.delete_config is not None:
         print("{config} did not exist in the list of configs. Make sure you typed it correctly or use --list-configs to view available configs".format(config=config_name))
         sys.exit(1)
 
+elif args.show_config is not None:
+    config_name = args.show_config
+
+    if config_name in main_config['configs']:
+        print(toml.dumps(main_config['configs'][config_name]))
+    else:
+        print("{config} did not exist in the list of configs. Make sure you typed it correctly or use --list-configs to view available configs".format(config=config_name))
+        sys.exit(1)
+
 elif args.edit_config is not None:
     config_name = args.edit_config
 
