@@ -90,6 +90,7 @@ else:
 
 # main command select
 if args.list_configs:
+    """Lists subvolume configurations"""
     fmt_string = "{name:<10}|{path:<20}"
     print(fmt_string.format(name="Config",path="Subvolume Path"))
     print(fmt_string.format(name="----------",path="--------------------"))
