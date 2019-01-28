@@ -20,6 +20,8 @@ __version__ = "0.0.1"
 
 assert sys.version_info >= (3, 6) # make sure we are running with at least python 3.6
 
+snapshot_subvol_name = ".snapshots"
+
 def btrfs_take_snapshot(src, dest, ro):
     """take btrfs snapshot"""
     if ro :
@@ -181,8 +183,13 @@ elif args.delete_config is not None:
                     btrfs_delete_subvolume(snapshot['path'])
                 else:
                     logging.warning("Snapshot: {snapshot} did not exist at {path}. Ignoring".format(snapshot=snapshot['name'], path=snapshot['path']))
-        del main_config['configs'][config_name]
-
+            # delete snapshot directory last
+            snapshot_subvol_path = os.path.join(main_config['configs'][config]['path'], snapshot_subvol_name)
+            if btrfs_subvolume_exists(snapshot_subvol_path):
+                btrfs_delete_subvolume(snapshot_subvol_path)
+            else:
+                logging.warning("{snapshot_subvol_name} subvolume did not exist. This is odd".format(snapshot_subvol_name=snapshot_subvol_name))
+        del main_config['configs'][config_name] # remove dictionary
     else:
         print("{config} did not exist in the list of configs. Make sure you typed it correctly or use --list-configs to view available configs".format(config=config_name))
         sys.exit(1)
