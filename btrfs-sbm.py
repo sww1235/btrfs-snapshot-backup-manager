@@ -174,6 +174,21 @@ elif args.create_config is not None:
         print("{path} is not a btrfs subvolume. Make sure you typed it correctly")
         sys.exit(1)
 elif args.delete_config is not None:
+    config_name = args.delete_config
+
+    if config_name in main_config['configs']:
+        if args.delete_snapshots:
+            for snapshots, snapshot in main_config['configs'][config_name]['snapshots'].items():
+                if btrfs_subvolume_exists(snapshot['path']):
+                    btrfs_delete_subvolume(snapshot['path'])
+                else:
+                    logging.warning("Snapshot: {snapshot} did not exist at {path}. Ignoring".format(snapshot=snapshot['name'], path=snapshot['path']))
+        del main_config['configs'][config_name]
+
+    else:
+        print("{config} did not exist in the list of configs. Make sure you typed it correctly or use --list-configs to view available configs".format(config=config_name))
+        sys.exit(1)
+else:
     pass
 
 
