@@ -99,10 +99,10 @@ if args.list_configs:
 elif args.create_config != "":
     """Initializes subvolume backups"""
     subvolume_path = args.create_config
-    # return_val =subprocess.run(["btrfs", "subvolume", "show",subvolume_path])
-    #
-    # if return_val.returncode != 0:
-    #     print("{path} is not a btrfs subvolume. Make sure you typed it correctly")
+    return_val =subprocess.run(["btrfs", "subvolume", "show",subvolume_path])
+
+    if return_val.returncode != 0:
+        print("{path} is not a btrfs subvolume. Make sure you typed it correctly")
 
     now = datetime.datetime.now()
     subvolume_name = os.path.basename(os.path.normpath(subvolume_path))
@@ -146,8 +146,7 @@ elif args.create_config != "":
             main_config['configs'][subvolume_name]['bkp-options'][config] = int(main_config['configs']['default']['bkp-options'][config])
 
     # create .shapshots directory
-    print("btrfs subvolume create", os.path.join(subvolume_path, ".snapshots"))
-    # subprocess.run(["btrfs", "subvolume", "create", os.path.join(subvolume_path, ".snapshots")])
+    subprocess.run(["btrfs", "subvolume", "create", os.path.join(subvolume_path, ".snapshots")])
 
     # create first snapshot
     # btrfs subvolume snapshot [-r] <source> <dest>|[<dest>/]<name>
