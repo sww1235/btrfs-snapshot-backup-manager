@@ -110,69 +110,65 @@ if args.list_configs:
 elif args.create_config != "":
     """Initializes subvolume backups"""
     subvolume_path = args.create_config
-    return_val =subprocess.run(["btrfs", "subvolume", "show",subvolume_path])
+    if btrfs_subvolume_exists(subvolume_path):
 
-    if return_val.returncode != 0:
-        print("{path} is not a btrfs subvolume. Make sure you typed it correctly")
+        now = datetime.datetime.now()
+        subvolume_name = os.path.basename(os.path.normpath(subvolume_path))
 
-    now = datetime.datetime.now()
-    subvolume_name = os.path.basename(os.path.normpath(subvolume_path))
+        snapshot_name = subvolume_name + "-"+ now.isoformat()
 
-    snapshot_name = subvolume_name + "-"+ now.isoformat()
-
-    # add subvolume to config table
-    if subvolume_name not in main_config['configs']:
-        main_config['configs'][subvolume_name] = {} # init dicts
-        main_config['configs'][subvolume_name]['options'] = {}
-        main_config['configs'][subvolume_name]['bkp-options'] = {}
-        main_config['configs'][subvolume_name]['snapshots'] = {}
-        main_config['configs'][subvolume_name]['snapshots'][snapshot_name] = {}
+        # add subvolume to config table
+        if subvolume_name not in main_config['configs']:
+            main_config['configs'][subvolume_name] = {} # init dicts
+            main_config['configs'][subvolume_name]['options'] = {}
+            main_config['configs'][subvolume_name]['bkp-options'] = {}
+            main_config['configs'][subvolume_name]['snapshots'] = {}
+            main_config['configs'][subvolume_name]['snapshots'][snapshot_name] = {}
 
 
-        main_config['configs'][subvolume_name]['name'] = subvolume_name
-        main_config['configs'][subvolume_name]['path'] = subvolume_path
+            main_config['configs'][subvolume_name]['name'] = subvolume_name
+            main_config['configs'][subvolume_name]['path'] = subvolume_path
 
-        for config, value in main_config['configs']['default']['options'].items():
-            # print(config, value)
-            try:
-                tmp = input("How many {snapshot_type} snapshots to keep? (Default={default}): \
-                            ".format(snapshot_type=config.split('-')[1],default=value))
-            except SyntaxError:
-                tmp = ""
-            print(tmp, type(tmp))
-            if tmp != "":
-                main_config['configs'][subvolume_name]['options'][config] = int(tmp)
-            else:
-                main_config['configs'][subvolume_name]['options'][config] = int(main_config['configs']['default']['options'][config])
+            for config, value in main_config['configs']['default']['options'].items():
+                # print(config, value)
+                try:
+                    tmp = input("How many {snapshot_type} snapshots to keep? (Default={default}): \
+                                ".format(snapshot_type=config.split('-')[1],default=value))
+                except SyntaxError:
+                    tmp = ""
+                print(tmp, type(tmp))
+                if tmp != "":
+                    main_config['configs'][subvolume_name]['options'][config] = int(tmp)
+                else:
+                    main_config['configs'][subvolume_name]['options'][config] = int(main_config['configs']['default']['options'][config])
 
-        for config, value in main_config['configs']['default']['bkp-options'].items():
-            # print(config, value)
-            try:
-                tmp = input("How many {snapshot_type} snapshots to keep in backup location? (Default={default}): \
-                            ".format(snapshot_type=config.split('-')[1],default=value))
-            except SyntaxError:
-                tmp = ""
-            if tmp !="":
-                main_config['configs'][subvolume_name]['bkp-options'][config] = int(tmp)
-            else:
-                main_config['configs'][subvolume_name]['bkp-options'][config] = int(main_config['configs']['default']['bkp-options'][config])
+            for config, value in main_config['configs']['default']['bkp-options'].items():
+                # print(config, value)
+                try:
+                    tmp = input("How many {snapshot_type} snapshots to keep in backup location? (Default={default}): \
+                                ".format(snapshot_type=config.split('-')[1],default=value))
+                except SyntaxError:
+                    tmp = ""
+                if tmp !="":
+                    main_config['configs'][subvolume_name]['bkp-options'][config] = int(tmp)
+                else:
+                    main_config['configs'][subvolume_name]['bkp-options'][config] = int(main_config['configs']['default']['bkp-options'][config])
 
-        # create .shapshots directory
-        print("btrfs subvolume create", os.path.join(subvolume_path, ".snapshots"))
-        # subprocess.run(["btrfs", "subvolume", "create", os.path.join(subvolume_path, ".snapshots")])
+            # create .shapshots directory
+            btrfs_create_subvolume(os.path.join(subvolume_path, ".snapshots"))
 
-        # create first snapshot
-        # btrfs subvolume snapshot [-r] <source> <dest>|[<dest>/]<name>
-        # btrfs subvolume snapshot -r /path/to/subvolume/ /path/to/subvolume/.shapshots
-        take_snapshot(subvolume_path, os.path.join(subvolume_path, ".snapshots", snapshot_name), True)
+            # create first snapshot
+            btrfs_take_snapshot(subvolume_path, os.path.join(subvolume_path, ".snapshots", snapshot_name), True)
 
-        main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['name'] = snapshot_name
-        main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['path'] = os.path.join(subvolume_path, ".snapshots", snapshot_name)
-        main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['creation-date-time'] = str(now.isoformat())
-        main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['type'] = "init"
+            main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['name'] = snapshot_name
+            main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['path'] = os.path.join(subvolume_path, ".snapshots", snapshot_name)
+            main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['creation-date-time'] = str(now.isoformat())
+            main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['type'] = "init"
+        else:
+            print("subvolume config {config} already exists. Please use --show-config or --edit config instead".format(config=subvolume_name))
     else:
-        print("subvolume config {config} already exists. Please use --show-config or --edit config instead".format(config=subvolume_name))
-
+        print("{path} is not a btrfs subvolume. Make sure you typed it correctly")
+        sys.exit(1)
 elif args.delete_config != "":
     pass
 
