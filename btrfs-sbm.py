@@ -18,6 +18,8 @@ import shutil
 
 __version__ = "0.0.1"
 
+assert sys.version_info >= (3, 6) # make sure we are running with at least python 3.6
+
 def take_snapshot(src, dest, ro):
     """take btrfs snapshot"""
     if ro :
