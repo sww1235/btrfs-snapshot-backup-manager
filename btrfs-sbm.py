@@ -20,14 +20,24 @@ __version__ = "0.0.1"
 
 assert sys.version_info >= (3, 6) # make sure we are running with at least python 3.6
 
-def take_snapshot(src, dest, ro):
+def btrfs_take_snapshot(src, dest, ro):
     """take btrfs snapshot"""
     if ro :
         subprocess.run(["btrfs", "subvolume", "snapshot", "-r", src, dest])
     else:
         subprocess.run(["btrfs", "subvolume", "snapshot", src, dest])
 
+def btrfs_subvolume_exists(path):
+        return_val =subprocess.run(["btrfs", "subvolume", "show",path])
+        if return_val.returncode != 0:
+            return False
+        else: return True
 
+def btrfs_create_subvolume(path):
+    subprocess.run(["btrfs", "subvolume", "create", path])
+
+def btrfs_delete_subvolume(path):
+    subprocess.run(["btrfs", "subvolume", "delete", path])
 
 # first thing, read command line options
 
