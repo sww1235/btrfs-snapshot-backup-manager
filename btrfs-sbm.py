@@ -8,7 +8,7 @@ import argparse
 import subprocess
 import os.path
 import sys
-import datetime
+from datetime import datetime, timedelta
 import logging
 import shutil
 
@@ -117,10 +117,10 @@ elif args.create_config is not None:
     if btrfs_subvolume_exists(subvolume_path):
         if 'default' in main_config['configs']:
 
-            now = datetime.datetime.now()
+            time_now = datetime.now()
             subvolume_name = os.path.basename(os.path.normpath(subvolume_path))
 
-            snapshot_name = subvolume_name + "-"+ now.isoformat()
+            snapshot_name = subvolume_name + "-"+ time_now.isoformat()
 
             snapshot_subvol_path = os.path.join(subvolume_path, snapshot_subvol_name)
 
@@ -169,7 +169,7 @@ elif args.create_config is not None:
 
                 main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['name'] = snapshot_name
                 main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['path'] = os.path.join(subvolume_path, snapshot_subvol_name, snapshot_name)
-                main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['creation-date-time'] = str(now.isoformat())
+                main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['creation-date-time'] = str(time_now.isoformat())
                 main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['type'] = "init"
             else:
                 print("subvolume config {config} already exists. Please use --show-config or --edit config instead".format(config=subvolume_name))
