@@ -25,12 +25,24 @@ I will also be including scripts to automatically upload and manage snapshots wi
 *   commands for create, list and delete configs
 *   commands to list and delete snapshots
 *   commands to diff snapshots
-*   commands to
+
+## Usage
+
+The usage intention is to run the script every hour using cron or a cron
+equivalent.
+
+Make sure to implement locking using a mechanism like below in order to prevent
+multiple instances of script running
+
+```cron
+# m h dom mon dow user  command
+*/20 *  *  *  *  root /usr/bin/flock -w 0 /var/cron.lock /usr/bin/myscript
+```
+(<https://serverfault.com/questions/748943/using-flock-with-cron>)
+
 ## Notes
 
-scripts will run as root (TODO: might want to look into sudo integration so other user can only run scripts and b2 commands as root without password, and do nothing else).
-
-use `.snapshots` subvolume to store snapshots like snapper. TODO: figure out snapshot naming scheme.
+use `.snapshots` subvolume to store snapshots like snapper. ~~TODO: figure out snapshot naming scheme.~~
 
 create config script:
 (~~bash~~ or python, python might be easier since I could use .json or .yaml config files with dicts. Python also is required for b2 integration anyways.)
