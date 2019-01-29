@@ -128,7 +128,6 @@ elif args.create_config is not None:
             if subvolume_name not in main_config['configs']:
                 main_config['configs'][subvolume_name] = {} # init dicts
                 main_config['configs'][subvolume_name]['options'] = {}
-                main_config['configs'][subvolume_name]['bkp-options'] = {}
                 main_config['configs'][subvolume_name]['snapshots'] = {}
                 main_config['configs'][subvolume_name]['snapshots'][snapshot_name] = {}
 
@@ -147,18 +146,6 @@ elif args.create_config is not None:
                         main_config['configs'][subvolume_name]['options'][config] = int(tmp)
                     else:
                         main_config['configs'][subvolume_name]['options'][config] = int(main_config['configs']['default']['options'][config])
-
-                for config, value in main_config['configs']['default']['bkp-options'].items():
-                    # print(config, value)
-                    try:
-                        tmp = input("How many {snapshot_type} snapshots to keep in backup location? (Default={default}): \
-                                    ".format(snapshot_type=config.split('-')[1],default=value))
-                    except SyntaxError:
-                        tmp = ""
-                    if tmp !="":
-                        main_config['configs'][subvolume_name]['bkp-options'][config] = int(tmp)
-                    else:
-                        main_config['configs'][subvolume_name]['bkp-options'][config] = int(main_config['configs']['default']['bkp-options'][config])
 
                 # create .snapshots subvolume
                 if not btrfs_subvolume_exists(snapshot_subvol_path):
