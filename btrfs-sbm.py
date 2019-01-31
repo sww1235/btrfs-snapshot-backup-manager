@@ -15,6 +15,7 @@ import shutil
 # external files
 # - log = /var/log/btrfs-sbm.log
 # - main settings = /etc/conf.d/btrfs-sbm.toml
+# - default settings = /etc/conf.d/btrfs-sbm-default.toml (read only)
 
 __version__ = "0.0.1"
 
