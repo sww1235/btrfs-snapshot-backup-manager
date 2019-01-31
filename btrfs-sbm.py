@@ -45,6 +45,29 @@ def btrfs_delete_subvolume(path):
     """Deletes a btrfs subvolume"""
     subprocess.run(["btrfs", "subvolume", "delete", path])
 
+def read_config_file(path, type):
+    """Reads TOML formatted config file safely
+
+    Checks to make sure file exists before reading. Handles errors if it does not.
+    """
+    # try to read config file
+    if os.path.exists(path):
+        try:
+            f = open(path, 'r') # force read only mode
+        except IOError:
+            logging.error("{type} config file was unable to be read: {path}!")
+            return {}
+        return toml.load(f)
+    else:
+        if type != "default":
+            logging.critical("{type} config file did not exist at {path}!")
+        else:
+            logging.critical("{type} config file did not exist at {path}! Using backup values in script")
+        return {}
+
+
+
+
 # first thing, read command line options
 
 parser = argparse.ArgumentParser()
