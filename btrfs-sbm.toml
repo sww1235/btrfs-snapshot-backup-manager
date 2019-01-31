@@ -1,7 +1,5 @@
 # main config file
 
-log-path = "/var/log/btrfs-sbm.log"
-
 # table of tables
 [configs]
 
