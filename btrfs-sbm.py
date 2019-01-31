@@ -100,45 +100,37 @@ logging.basicConfig(filename = log_Path,level = numeric_log_level )
 logging.info("logging started")
 
 main_config = {}
+default_config = {}
 
+main_config = read_config_file(main_config_file_path, "main")
 
-# try to read config file
-if os.path.exists(main_config_file_path) and os.path.exists(default_config_file_path):# both files exist
-    try:
-        f = open(main_config_file_path)
-    except IOError:
-        logging.error("main config file did not exist at: " + main_config_file_path)
-        sys.exit(1)
-    main_config = toml.load(f)
-elif os.path.exists(main_config_file_path) and not os.path.exists(default_config_file_path):
-    logging.info("default config file does not exist: creating now")
-    shutil.copy2(main_config_file_path, default_config_file_path) # preserve default config file with comments
-    try:
-        f = open(main_config_file_path)
-    except IOError:
-        logging.error("main config file did not exist at: " + main_config_file_path)
-        sys.exit(1)
-    main_config = toml.load(f)
-else:
-    logging.critical("config file did not exist! Aborting")
-    sys.exit(1)
+if not main_config: # empty dict evaluates as false
+    logging.warning("main config file not found at {main_config_file_path}. No configs present. \
+    Please run script with --create-config option to create a config. This will create a non empty config file.")
+
+default_config = read_config_file(default_config_file_path, "default")
 
 
 
-# main command select
-if args.list_configs:
-    """Lists subvolume configurations"""
-    fmt_string = "{name:<10}|{path:<20}"
-    print(fmt_string.format(name="Config",path="Subvolume Path"))
-    print(fmt_string.format(name="----------",path="--------------------"))
-    for key, subvol in main_config['configs'].items(): # subvol is dict representing individual config
-        print(fmt_string.format(name=subvol['name'],path=subvol['path']))
+if not default_config: # empty dict evaluates as false
+    logging.error("default config file not found at {default_config_file_path}. Using defaults in script")
+    default_config = {'keep-hourly': 10, 'keep-daily': 10, 'keep-weekly': 0, 'keep-monthly': 10, 'keep-yearly': 10}
 
-elif args.create_config is not None:
-    """Initializes subvolume backups"""
-    subvolume_path = args.create_config
-    if btrfs_subvolume_exists(subvolume_path):
-        if 'default' in main_config['configs']:
+
+if main_config: # empty dict evaluates as false
+
+    # main command select
+    if args.list_configs:
+        """Lists subvolume configurations"""
+        fmt_string = "{name:<10}|{path:<20}"
+        print(fmt_string.format(name="Config",path="Subvolume Path"))
+        print(fmt_string.format(name="----------",path="--------------------"))
+        for key, subvol in main_config['configs'].items(): # subvol is dict representing individual config
+            print(fmt_string.format(name=subvol['name'],path=subvol['path']))
+    elif args.create_config is not None:
+        """Initializes subvolume backups"""
+        subvolume_path = args.create_config
+        if btrfs_subvolume_exists(subvolume_path):
 
             time_now = datetime.now()
             subvolume_name = os.path.basename(os.path.normpath(subvolume_path))
@@ -158,7 +150,7 @@ elif args.create_config is not None:
                 main_config['configs'][subvolume_name]['name'] = subvolume_name
                 main_config['configs'][subvolume_name]['path'] = subvolume_path
 
-                for config, value in main_config['configs']['default']['options'].items():
+                for config, value in default_config.items():
                     # print(config, value)
                     try:
                         tmp = input("How many {snapshot_type} snapshots to keep? (Default={default}): \
@@ -168,7 +160,7 @@ elif args.create_config is not None:
                     if tmp != "":
                         main_config['configs'][subvolume_name]['options'][config] = int(tmp)
                     else:
-                        main_config['configs'][subvolume_name]['options'][config] = int(main_config['configs']['default']['options'][config])
+                        main_config['configs'][subvolume_name]['options'][config] = int(value)
 
                 # create .snapshots subvolume
                 if not btrfs_subvolume_exists(snapshot_subvol_path):
@@ -184,62 +176,74 @@ elif args.create_config is not None:
             else:
                 print("subvolume config {config} already exists. Please use --show-config or --edit config instead".format(config=subvolume_name))
                 sys.exit(1)
+
         else:
-            print("default options are not present in config file. Please copy from default config file or create manually.")
+            print("{path} is not a btrfs subvolume. Make sure you typed it correctly")
             sys.exit(1)
-    else:
-        print("{path} is not a btrfs subvolume. Make sure you typed it correctly")
-        sys.exit(1)
-elif args.delete_config is not None:
-    config_name = args.delete_config
+    elif args.delete_config is not None:
+        config_name = args.delete_config
 
-    if config_name in main_config['configs']:
-        if args.delete_snapshots:
-            for snapshots, snapshot in main_config['configs'][config_name]['snapshots'].items():
-                if btrfs_subvolume_exists(snapshot['path']):
-                    btrfs_delete_subvolume(snapshot['path'])
+        if config_name in main_config['configs']:
+            if args.delete_snapshots: # also delete snapshots
+                for snapshots, snapshot in main_config['configs'][config_name]['snapshots'].items():
+                    if btrfs_subvolume_exists(snapshot['path']):
+                        btrfs_delete_subvolume(snapshot['path'])
+                    else:
+                        logging.warning("Snapshot: {snapshot} did not exist at {path}. Ignoring".format(snapshot=snapshot['name'], path=snapshot['path']))
+                # delete snapshot directory last
+                snapshot_subvol_path = os.path.join(main_config['configs'][config]['path'], snapshot_subvol_name)
+                if btrfs_subvolume_exists(snapshot_subvol_path):
+                    btrfs_delete_subvolume(snapshot_subvol_path)
                 else:
-                    logging.warning("Snapshot: {snapshot} did not exist at {path}. Ignoring".format(snapshot=snapshot['name'], path=snapshot['path']))
-            # delete snapshot directory last
-            snapshot_subvol_path = os.path.join(main_config['configs'][config]['path'], snapshot_subvol_name)
-            if btrfs_subvolume_exists(snapshot_subvol_path):
-                btrfs_delete_subvolume(snapshot_subvol_path)
-            else:
-                logging.warning("{snapshot_subvol_name} subvolume did not exist. This is odd".format(snapshot_subvol_name=snapshot_subvol_name))
-        del main_config['configs'][config_name] # remove dictionary
-    else:
-        print("{config} did not exist in the list of configs. Make sure you typed it correctly or use --list-configs to view available configs".format(config=config_name))
-        sys.exit(1)
+                    logging.warning("{snapshot_subvol_name} subvolume did not exist. This is odd")
+            del main_config['configs'][config_name] # remove dictionary
+        else:
+            print("{config} did not exist in the list of configs. Make sure you typed it correctly or use --list-configs to view available configs".format(config=config_name))
+            sys.exit(1)
 
-elif args.show_config is not None:
-    config_name = args.show_config
+    elif args.show_config is not None:
+        config_name = args.show_config
 
-    if config_name in main_config['configs']:
-        print(toml.dumps(main_config['configs'][config_name]))
-    else:
-        print("{config} did not exist in the list of configs. Make sure you typed it correctly or use --list-configs to view available configs".format(config=config_name))
-        sys.exit(1)
+        if config_name in main_config['configs']:
+            print(toml.dumps(main_config['configs'][config_name]))
+        else:
+            print("{config} did not exist in the list of configs. Make sure you typed it correctly or use --list-configs to view available configs".format(config=config_name))
+            sys.exit(1)
 
-elif args.edit_config is not None:
-    config_name = args.edit_config
+    elif args.edit_config is not None:
+        config_name = args.edit_config
 
-    if config_name in main_config['configs']:
-        print(toml.dumps(main_config['configs'][config_name]))
-        #TODO: look into python editor or implement subset myself
-    else:
-        print("{config} did not exist in the list of configs. Make sure you typed it correctly or use --list-configs to view available configs".format(config=config_name))
-        sys.exit(1)
+        if config_name in main_config['configs']:
+            print(toml.dumps(main_config['configs'][config_name]))
+            #TODO: look into python editor or implement subset myself
+        else:
+            print("{config} did not exist in the list of configs. Make sure you typed it correctly or use --list-configs to view available configs".format(config=config_name))
+            sys.exit(1)
+
+    else: # automatic functionality
+        time_now = datetime.now()
+
+
 else:
-    pass
+    pass # continue on and save main config file
 
 
 if os.path.exists(main_config_file_path):
     try:
-        f = open(main_config_file_path,'w')
-    except IOError:
-        logging.error("main config file did not exist at: " + main_config_file_path)
+        shutil.copy2(main_config_file_path, main_config_file_path + ".bak")
+    except IOError as e:
+        logging.critical("failed to backup main config file. See exception {e}")
+        sys.exit(1)
+    try:
+        f = open(main_config_file_path,'w') # overwrites file
+    except IOError as e:
+        logging.critical("main config file could not be opened. See exception {e}")
         sys.exit(1)
     toml.dump(main_config,f) # write config file
 else:
-    logging.critical("config file did not exist! Aborting")
-    sys.exit(1)
+    logging.warning("main config file did not exist. Creating now at {main_config_file_path}.")
+    try:
+        f = open(main_config_file_path,'w+') # create and update file (truncates)
+    except IOError as e:
+        logging.critical("Could not create new config file at {main_config_file_path}. See exception {e}")
+        sys.exit(1)
