@@ -59,6 +59,36 @@ probably one main script, with a separate create config script (maybe).
 
 main script has cmd line options in order to tell if it is being called hourly or daily
 
+## Config file layout
+
+The main config file is written in TOML and is formatted similarly to the example below:
+
+```toml
+[configs] # this is the overall table which contains all subvolume configurations
+
+[configs.subvolume] # Subtable for each subvolume configuration
+# options for subvolume config
+name = "subvolume"
+path = "/path/to/subvolume"
+
+[configs.subvolume.options] # specific options for how many snapshots to keep
+keep-hourly = 10
+keep-daily = 10
+keep-weekly = 0
+keep-monthly = 10
+keep-yearly = 10
+
+[configs.subvolume.snapshots] # subtable containing all snapshots
+
+[configs.subvolume.snapshots."subvolume-2019-01-27T23:04:35.418948"] # individual snapshot subtable
+name = "subvolume-2019-01-27T23:04:35.418948"
+path = "/path/to/subvolume/.snapshots/subvolume-2019-01-27T23:04:35.418948"
+creation-date-time = "2019-01-27T23:04:35.418948"
+type = "init" # type can be an element of [init, hourly, weekly, monthly, yearly]
+
+
+```
+
 ## Package Requirements
 
 toml
