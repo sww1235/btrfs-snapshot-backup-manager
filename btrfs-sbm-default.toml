@@ -1,24 +1,7 @@
-# main config file
+# default config file
 
-log-path = "/var/log/btrfs-sbm.log"
-
-# table of tables
-[configs]
-
-# default config table of a single subvolume config
-[configs.default]
-
-name = ""
-path = ""
 keep-hourly = 10
 keep-daily = 10
 keep-weekly = 0
 keep-monthly = 10
 keep-yearly = 10
-
-# [configs.default.snapshots.snapshot]
-# list of snapshots
-# name = ""
-# type = "" # daily or hourly
-# path = ""
-# creation_date_time = "" # iso format
