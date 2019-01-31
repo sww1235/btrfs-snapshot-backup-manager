@@ -87,7 +87,6 @@ parser.add_argument('--log-level',action='store', default = "WARNING", help = "s
 args = parser.parse_args()
 
 main_config_file_path = os.path.join(args.sysconfig_dir,"btrfs-sbm.toml")
-
 default_config_file_path = os.path.join(args.sysconfig_dir, "btrfs-sbm-default.toml")
 
 log_Path = os.path.join("/","var","log","btrfs-sbm.log")
