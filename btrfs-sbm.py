@@ -324,6 +324,26 @@ if main_config: # empty dict evaluates as false
             print("{config} did not exist in the list of configs. Make sure you typed it correctly or use --list-configs to view available configs".format(config=config_name))
             sys.exit(1)
 
+    elif args.list_snapshots is not None:
+        config_name = args.list_snapshots
+        pass
+        # TODO: implement list_snapshots
+        # create custom pretty print function so it can be reused
+        # have option to print snapshot numbers or not
+
+    elif args.list_all_snapshots:
+        pass
+        # TODO: loop through all subvolumes and call list_snapshots
+
+    elif args.delete_snapshot is not None:
+        config_name = args.delete_snapshot
+        # TODO:
+        # - print list of snapshots in config.
+        # use same mechanism as list_snapshots
+        # but print and keep track of snapshot numbers
+        # - prompt for snapshot number to delete
+        # - delete snapshot after confirmation printout and prompt
+
     else: # automatic functionality
         time_now = datetime.now()
 
