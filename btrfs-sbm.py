@@ -36,27 +36,77 @@ except IOError:
 snapshot_subvol_name = ".snapshots"
 
 def btrfs_take_snapshot(src, dest, ro):
-    """take btrfs snapshot"""
+    """take btrfs snapshot
+
+    Uses btrfs-progs snapshot command to take a snapshot of the src subvolume
+    Keyword arguments:
+    src -- path to source subvolume as string
+    dest -- path to destination snapshot as string. This includes the name of the snapshot itself.
+    See the documentation of btrfs subvolume for further details.
+    ro -- whether to take a read only snapshot
+    """
     if ro :
-        subprocess.run(["btrfs", "subvolume", "snapshot", "-r", src, dest])
+        if testing:
+            print("btrfs subvolume snapshot -r {src} {dest}")
+        else:
+            return_val = subprocess.run(["btrfs", "subvolume", "snapshot", "-r", src, dest], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    logging.info("Taking new read only snapshot of {src} at {dest}")
     else:
-        subprocess.run(["btrfs", "subvolume", "snapshot", src, dest])
+        if testing:
+            print("btrfs subvolume snapshot {src} {dest}")
+        else:
+            return_val = subprocess.run(["btrfs", "subvolume", "snapshot", src, dest], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        logging.info("Taking new snapshot of {src} at {dest}")
+    if not testing:
+        # log stdout and stderr from btrfs commands
+        logging.info(return_val.stdout)
+        logging.error(return_val.stderr)
 
 def btrfs_subvolume_exists(path):
-    """Checks if path is a btrfs subvolume"""
-    return_val =subprocess.run(["btrfs", "subvolume", "show",path])
-    if return_val.returncode != 0:
-        return False
-    else: return True
+    """Checks if path is a btrfs subvolume
+
+    Uses btrfs subvolume show command to detect if a subvolume exists
+    Keyword arguments:
+    path -- path to subvolume as string
+    """
+    if testing:
+        return True
+    else:
+        return_val =subprocess.run(["btrfs", "subvolume", "show",subvolume_path], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+        if return_val.returncode != 0:
+            logging.error(return_val.stderr)
+            return False
+        else: return True
 
 def btrfs_create_subvolume(path):
-    """Creates a btrfs subvolume"""
-    subprocess.run(["btrfs", "subvolume", "create", path])
+    """Creates a btrfs subvolume
+
+    Uses btrfs-progs subvolume command to create a new subvolume
+    Keyword arguments:
+    path -- path to subvolume as string
+    """
+    if testing:
+        print("btrfs subvolume create {path}")
+    else:
+        subprocess.run(["btrfs", "subvolume", "create", path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        logging.info(return_val.stdout)
+        logging.error(return_val.stderr)
+    logging.info("Creating new subvolume at {path}")
 
 def btrfs_delete_subvolume(path):
-    """Deletes a btrfs subvolume"""
-    subprocess.run(["btrfs", "subvolume", "delete", path])
+    """Deletes a btrfs subvolume
 
+    Uses btrfs-progs subvolume command to delete a subvolume. Cannot recursively delete subvolumes.
+    Keyword arguments:
+    path -- path to subvolume as string
+    """
+    if testing:
+        print("btrfs subvolume delete {path}")
+    else:
+        subprocess.run(["btrfs", "subvolume", "delete", path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        logging.info(return_val.stdout)
+        logging.error(return_val.stderr)
+    logging.info("Deleting subvolume at {path}")
 def read_config_file(path, type):
     """Reads TOML formatted config file safely
 
