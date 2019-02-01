@@ -11,6 +11,7 @@ import sys
 from datetime import datetime, timedelta
 import logging
 import shutil
+import fcntl
 
 # external files
 # - log = /var/log/btrfs-sbm.log
@@ -19,7 +20,18 @@ import shutil
 
 __version__ = "0.0.1"
 
-assert sys.version_info >= (3, 6) # make sure we are running with at least python 3.6
+testing = True
+
+# make sure we are running with at least python 3.6
+assert sys.version_info >= (3, 6) "You are running an old version of python less than version 3.6. Please upgrade or fix the script yourself."
+
+# only let one instance of script run at a time
+lockfile_path = os.path.join("/", "tmp", "btrfs-sbm.lock")
+lockfile = open(lockfile_path, "a+")
+try:
+    fcntl.flock(lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
+except IOError:
+    sys.exit("Multiple instances of script cannot be running at the same time. Try running it again in a few minutes")
 
 snapshot_subvol_name = ".snapshots"
 
