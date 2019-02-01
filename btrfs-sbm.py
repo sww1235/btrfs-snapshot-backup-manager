@@ -348,6 +348,81 @@ if main_config: # empty dict evaluates as false
         time_now = datetime.now()
 
 
+        # loop through all subvolume configs except default
+        for key, subvolume in main_config['configs'].items():
+
+            subvolume_name = subvolume['name']
+            subvolume_path = subvolume['path']
+
+            snapshot_name = subvolume_name + "-"+ time_now.isoformat()
+            snapshot_subvol_path = os.path.join(subvolume_path, snapshot_subvol_name)
+
+            newest_snapshot = max(subvolume['snapshots'].items(), key=lambda x: x[1]['creation-date-time'])[0]
+            newest_snapshot_time = datetime.fromisoformat(subvolume['snapshots'][newest_snapshot]['creation-date-time'])
+            # delta between last snapshot and now is at least 1 hour
+            if time_now >= newest_snapshot_time + timedelta(hours=1):
+                subvolume['snapshots'][snapshot_name] = {}
+                # assuming subvol and .snapshot directory already exist
+                btrfs_take_snapshot(subvolume['path'], os.path.join(snapshot_subvol_path, snapshot_name), True)
+                subvolume['snapshots'][snapshot_name]['name'] = snapshot_name
+                subvolume['snapshots'][snapshot_name]['path'] = os.path.join(subvolume_path, snapshot_subvol_name, snapshot_name)
+                subvolume['snapshots'][snapshot_name]['creation-date-time'] = str(time_now.isoformat())
+
+                if time_now.hour == 0 and not newest_snapshot_time.hour == 0:
+                    subvolume['snapshots'][snapshot_name]['type'] = "daily"
+                elif time_now.isoweekday() == 1 and not newest_snapshot_time.isoweekday() == 1: # begining of week = monday
+                    subvolume['snapshots'][snapshot_name]['type'] = "weekly"
+                elif time_now.day == 1 and not newest_snapshot_time.day == 1: # first day of month
+                    subvolume['snapshots'][snapshot_name]['type'] = "monthly"
+                elif(time_now.month == 1 and time_now.day == 1) and not (newest_snapshot_time.month == 1 and newest_snapshot_time.day == 1): # first day of year
+                    subvolume['snapshots'][snapshot_name]['type'] = "yearly"
+                else:
+                    subvolume['snapshots'][snapshot_name]['type'] = "hourly"
+                # # TODO: btrfs send diff between snapshots
+                # send each snapshot diff to tmp directory, encrypt, then upload to B2, then delete from tmp folder
+
+            num_snapshots = {'hourly' : 0, 'daily' : 0, 'weekly' : 0, 'monthly' : 0, 'yearly' : 0}
+            snapshots_by_type = {'hourly' : {}, 'daily' : {}, 'weekly' : {}, 'monthly' : {}, 'yearly' : {}}
+
+            # count number of each type of snapshot
+            for snapshots, snapshot in subvolume['snapshots'].items():
+                snapshot_type = snapshot['type']
+                if snapshot_type != 'init':
+                    num_snapshots[snapshot_type] += 1
+                    snapshots_by_type[snapshot_type][snapshot['name']]= snapshot
+                else: pass
+
+            print(num_snapshots)
+
+            # check if number of snapshots of each type are over limit, and remove oldest
+
+            for type, value in num_snapshots.items():
+                if value > subvolume['options']["keep-"+type]:
+                    # list of snapshots
+                    # lambda k: k[1]['creation-date-time'] the [1] is essentially selecting the value in the key value pair that is x
+                    # where key = snapshots dict, and value is individual snapshot dict beneath it.
+                    newlist = sorted(snapshots_by_type[type].items(), key=lambda k: k[1]['creation-date-time'])
+                    # delete oldest snapshots up to max
+                    for sel in range(value - subvolume['options']["keep-"+type]):
+                        # newlist is list of tuples (snapshot name, snapshot dict) due to .items()
+                        # need to select tuple within that, then select snapshot dict inside tuple
+                        # print(newlist[sel][1]['path'])
+                        btrfs_delete_subvolume(newlist[sel][1]['path'])
+                        del subvolume['snapshots'][newlist[sel][0]]
+                else:
+                    pass
+                    # print("false")
+
+    # TODO: implement snapshot backup functionality
+    # send each snapshot diff to tmp directory, encrypt, then upload to B2, then delete from temp folder
+    # remember: snapshots are full "copies" of subvolume, snapshot diffs are "diffs"
+    # need all diffs in order to recreate final state.
+    # diffs should only be slighly larger than actual data
+
+    # TODO: check if snapshot diff is empty, if it is discard snapshot. This won't affect
+    # backup stuff, since the btrfs incremental send will be between the previously saved snapshot,
+    # which is the one before deleted snapshot
+
 else:
     pass # continue on and save main config file
 
