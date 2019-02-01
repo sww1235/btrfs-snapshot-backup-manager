@@ -107,6 +107,35 @@ def btrfs_delete_subvolume(path):
         logging.info(return_val.stdout)
         logging.error(return_val.stderr)
     logging.info("Deleting subvolume at {path}")
+
+def btrfs_send_snapshot_diff(old, new=None):
+    """Outputs diff between two subvolumes (snapshots) to a file
+
+    Keyword arguments:
+    old -- path to older subvolume (snapshots) as string
+    new -- path to newer subvolume (snapshots) as string. (optional)
+    """
+    if new:
+        filename = os.path.basename(old) + "::" + os.path.basename(new)
+        if testing:
+            print("btrfs send -p {old} -f {filename} {new}")
+        else:
+            subprocess.run(["btrfs", "send", "-p", old, "-f", filename, new], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            logging.info(return_val.stdout)
+            logging.error(return_val.stderr)
+        logging.info("Sending difference between {old} and {new} to {filename}")
+    else:
+        filename = "init" + "::" + os.path.basename(old)
+        if testing:
+            print("btrfs send -f {filename} {old}")
+        else:
+            subprocess.run(["btrfs", "send", "-f", filename, old], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            logging.info(return_val.stdout)
+            logging.error(return_val.stderr)
+        logging.info("Sending {old} to {filename}")
+
+# TODO: implement function to check if there is a difference between btrfs snapshots
+
 def read_config_file(path, type):
     """Reads TOML formatted config file safely
 
