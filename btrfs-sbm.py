@@ -140,6 +140,11 @@ def read_config_file(path, type):
     """Reads TOML formatted config file safely
 
     Checks to make sure file exists before reading. Handles errors if it does not.
+    Keyword arguments:
+    path -- path of config file as string
+    type -- type of config file as string. Default handled differently.
+
+    Returns dict
     """
     # try to read config file
     if os.path.exists(path):
