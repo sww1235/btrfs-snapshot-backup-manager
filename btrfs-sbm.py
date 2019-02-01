@@ -277,6 +277,8 @@ if main_config: # empty dict evaluates as false
                 main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['path'] = os.path.join(subvolume_path, snapshot_subvol_name, snapshot_name)
                 main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['creation-date-time'] = str(time_now.isoformat())
                 main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['type'] = "init"
+
+                # TODO: send intial snapshot to b2
             else:
                 print("subvolume config {config} already exists. Please use --show-config or --edit config instead".format(config=subvolume_name))
                 sys.exit(1)
