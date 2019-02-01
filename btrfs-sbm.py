@@ -20,6 +20,7 @@ import fcntl
 
 __version__ = "0.0.1"
 
+# TODO: remove in production version
 testing = True
 
 # make sure we are running with at least python 3.6
@@ -182,10 +183,17 @@ parser.add_argument('--version',action='version',version=__version__ )
 parser.add_argument('--log-level',action='store', default = "WARNING", help = "sets logging level")
 args = parser.parse_args()
 
-main_config_file_path = os.path.join(args.sysconfig_dir,"btrfs-sbm.toml")
-default_config_file_path = os.path.join(args.sysconfig_dir, "btrfs-sbm-default.toml")
+if testing:
+    main_config_file_path = "./btrfs-sbm.toml"
+    default_config_file_path = "./btrfs-sbm-default.toml"
+else:
+    main_config_file_path = os.path.join(args.sysconfig_dir,"btrfs-sbm.toml")
+    default_config_file_path = os.path.join(args.sysconfig_dir, "btrfs-sbm-default.toml")
 
-log_Path = os.path.join("/","var","log","btrfs-sbm.log")
+if testing:
+    log_Path = "./testlog.log"
+else:
+    log_Path = os.path.join("/","var","log","btrfs-sbm.log")
 
 numeric_log_level = getattr(logging, args.log_level.upper(), None)
 if not isinstance(numeric_log_level, int):
