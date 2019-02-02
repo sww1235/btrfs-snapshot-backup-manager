@@ -51,13 +51,13 @@ def btrfs_take_snapshot(src, dest, ro):
             print("btrfs subvolume snapshot -r {src} {dest}")
         else:
             return_val = subprocess.run(["btrfs", "subvolume", "snapshot", "-r", src, dest], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    logging.info("Taking new read only snapshot of {src} at {dest}")
+        logging.info(f"Taking new read only snapshot of {src} at {dest}")
     else:
         if testing:
-            print("btrfs subvolume snapshot {src} {dest}")
+            print(f"btrfs subvolume snapshot {src} {dest}")
         else:
             return_val = subprocess.run(["btrfs", "subvolume", "snapshot", src, dest], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        logging.info("Taking new snapshot of {src} at {dest}")
+        logging.info(f"Taking new snapshot of {src} at {dest}")
     if not testing:
         # log stdout and stderr from btrfs commands
         logging.info(return_val.stdout)
@@ -87,12 +87,12 @@ def btrfs_create_subvolume(path):
     path -- path to subvolume as string
     """
     if testing:
-        print("btrfs subvolume create {path}")
+        print(f"btrfs subvolume create {path}")
     else:
         subprocess.run(["btrfs", "subvolume", "create", path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         logging.info(return_val.stdout)
         logging.error(return_val.stderr)
-    logging.info("Creating new subvolume at {path}")
+    logging.info(f"Creating new subvolume at {path}")
 
 def btrfs_delete_subvolume(path):
     """Deletes a btrfs subvolume
@@ -102,12 +102,12 @@ def btrfs_delete_subvolume(path):
     path -- path to subvolume as string
     """
     if testing:
-        print("btrfs subvolume delete {path}")
+        print(f"btrfs subvolume delete {path}")
     else:
         subprocess.run(["btrfs", "subvolume", "delete", path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         logging.info(return_val.stdout)
         logging.error(return_val.stderr)
-    logging.info("Deleting subvolume at {path}")
+    logging.info(f"Deleting subvolume at {path}")
 
 def btrfs_send_snapshot_diff(old, new=None):
     """Outputs diff between two subvolumes (snapshots) to a file
@@ -121,22 +121,22 @@ def btrfs_send_snapshot_diff(old, new=None):
         filename = os.path.basename(old) + "::" + os.path.basename(new)
         filepath = os.path.join(tmp_path, filepath)
         if testing:
-            print("btrfs send -p {old} -f {filepath} {new}")
+            print(f"btrfs send -p {old} -f {filepath} {new}")
         else:
             subprocess.run(["btrfs", "send", "-p", old, "-f", filename, new], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             logging.info(return_val.stdout)
             logging.error(return_val.stderr)
-        logging.info("Sending difference between {old} and {new} to {filepath}")
+        logging.info(f"Sending difference between {old} and {new} to {filepath}")
     else:
         filename = "init" + "::" + os.path.basename(old)
         filepath = os.path.join(tmp_path, filename)
         if testing:
-            print("btrfs send -f {filepath} {old}")
+            print(f"btrfs send -f {filepath} {old}")
         else:
             subprocess.run(["btrfs", "send", "-f", filepath, old], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             logging.info(return_val.stdout)
             logging.error(return_val.stderr)
-        logging.info("Sending {old} to {filepath}")
+        logging.info(f"Sending {old} to {filepath}")
 
     return filepath
 # TODO: implement function to check if there is a difference between btrfs snapshots
@@ -156,14 +156,14 @@ def read_config_file(path, type):
         try:
             f = open(path, 'r') # force read only mode
         except IOError:
-            logging.error("{type} config file was unable to be read: {path}!")
+            logging.error(f"{type} config file was unable to be read: {path}!")
             return {}
         return toml.load(f)
     else:
         if type != "default":
-            logging.critical("{type} config file did not exist at {path}!")
+            logging.critical(f"{type} config file did not exist at {path}!")
         else:
-            logging.critical("{type} config file did not exist at {path}! Using backup values in script")
+            logging.critical(f"{type} config file did not exist at {path}! Using backup values in script")
         return {}
 
 
@@ -213,7 +213,7 @@ default_config = {}
 main_config = read_config_file(main_config_file_path, "main")
 
 if not main_config: # empty dict evaluates as false
-    logging.warning("main config file not found at {main_config_file_path}. No configs present. \
+    logging.warning(f"main config file not found at {main_config_file_path}. No configs present. \
     Please run script with --create-config option to create a config. This will create a non empty config file.")
 
 default_config = read_config_file(default_config_file_path, "default")
@@ -221,7 +221,7 @@ default_config = read_config_file(default_config_file_path, "default")
 
 
 if not default_config: # empty dict evaluates as false
-    logging.error("default config file not found at {default_config_file_path}. Using defaults in script")
+    logging.error(f"default config file not found at {default_config_file_path}. Using defaults in script")
     default_config = {'keep-hourly': 10, 'keep-daily': 10, 'keep-weekly': 0, 'keep-monthly': 10, 'keep-yearly': 10}
 
 
@@ -287,11 +287,11 @@ if main_config: # empty dict evaluates as false
                 # use returned path into b2 updloader tool to do excrytption, compression
                 # and uploads
             else:
-                print("subvolume config {config} already exists. Please use --show-config or --edit config instead".format(config=subvolume_name))
+                print(f"subvolume config {subvolume_name} already exists. Please use --show-config or --edit config instead")
                 sys.exit(1)
 
         else:
-            print("{path} is not a btrfs subvolume. Make sure you typed it correctly")
+            print(f"{path} is not a btrfs subvolume. Make sure you typed it correctly")
             sys.exit(1)
     elif args.delete_config is not None:
         config_name = args.delete_config
@@ -308,10 +308,10 @@ if main_config: # empty dict evaluates as false
                 if btrfs_subvolume_exists(snapshot_subvol_path):
                     btrfs_delete_subvolume(snapshot_subvol_path)
                 else:
-                    logging.warning("{snapshot_subvol_name} subvolume did not exist. This is odd")
+                    logging.warning(f"{snapshot_subvol_name} subvolume did not exist. This is odd")
             del main_config['configs'][config_name] # remove dictionary
         else:
-            print("{config} did not exist in the list of configs. Make sure you typed it correctly or use --list-configs to view available configs".format(config=config_name))
+            print(f"{config_name} did not exist in the list of configs. Make sure you typed it correctly or use --list-configs to view available configs")
             sys.exit(1)
 
     elif args.show_config is not None:
@@ -320,7 +320,7 @@ if main_config: # empty dict evaluates as false
         if config_name in main_config['configs']:
             print(toml.dumps(main_config['configs'][config_name]))
         else:
-            print("{config} did not exist in the list of configs. Make sure you typed it correctly or use --list-configs to view available configs".format(config=config_name))
+            print(f"{config} did not exist in the list of configs. Make sure you typed it correctly or use --list-configs to view available configs")
             sys.exit(1)
 
     elif args.edit_config is not None:
@@ -330,7 +330,7 @@ if main_config: # empty dict evaluates as false
             print(toml.dumps(main_config['configs'][config_name]))
             #TODO: look into python editor or implement subset myself
         else:
-            print("{config} did not exist in the list of configs. Make sure you typed it correctly or use --list-configs to view available configs".format(config=config_name))
+            print(f"{config_name} did not exist in the list of configs. Make sure you typed it correctly or use --list-configs to view available configs")
             sys.exit(1)
 
     elif args.list_snapshots is not None:
@@ -441,18 +441,18 @@ if os.path.exists(main_config_file_path):
     try:
         shutil.copy2(main_config_file_path, main_config_file_path + ".bak")
     except IOError as e:
-        logging.critical("failed to backup main config file. See exception {e}")
+        logging.critical(f"failed to backup main config file. See exception {e}")
         sys.exit(1)
     try:
         f = open(main_config_file_path,'w') # overwrites file
     except IOError as e:
-        logging.critical("main config file could not be opened. See exception {e}")
+        logging.critical(f"main config file could not be opened. See exception {e}")
         sys.exit(1)
     toml.dump(main_config,f) # write config file
 else:
-    logging.warning("main config file did not exist. Creating now at {main_config_file_path}.")
+    logging.warning(f"main config file did not exist. Creating now at {main_config_file_path}.")
     try:
         f = open(main_config_file_path,'w+') # create and update file (truncates)
     except IOError as e:
-        logging.critical("Could not create new config file at {main_config_file_path}. See exception {e}")
+        logging.critical(f"Could not create new config file at {main_config_file_path}. See exception {e}")
         sys.exit(1)
