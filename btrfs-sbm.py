@@ -116,25 +116,29 @@ def btrfs_send_snapshot_diff(old, new=None):
     old -- path to older subvolume (snapshots) as string
     new -- path to newer subvolume (snapshots) as string. (optional)
     """
+    tmp_path = os.path.join("/", "tmp")
     if new:
         filename = os.path.basename(old) + "::" + os.path.basename(new)
+        filepath = os.path.join(tmp_path, filepath)
         if testing:
-            print("btrfs send -p {old} -f {filename} {new}")
+            print("btrfs send -p {old} -f {filepath} {new}")
         else:
             subprocess.run(["btrfs", "send", "-p", old, "-f", filename, new], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             logging.info(return_val.stdout)
             logging.error(return_val.stderr)
-        logging.info("Sending difference between {old} and {new} to {filename}")
+        logging.info("Sending difference between {old} and {new} to {filepath}")
     else:
         filename = "init" + "::" + os.path.basename(old)
+        filepath = os.path.join(tmp_path, filename)
         if testing:
-            print("btrfs send -f {filename} {old}")
+            print("btrfs send -f {filepath} {old}")
         else:
-            subprocess.run(["btrfs", "send", "-f", filename, old], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.run(["btrfs", "send", "-f", filepath, old], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             logging.info(return_val.stdout)
             logging.error(return_val.stderr)
-        logging.info("Sending {old} to {filename}")
+        logging.info("Sending {old} to {filepath}")
 
+    return filepath
 # TODO: implement function to check if there is a difference between btrfs snapshots
 
 def read_config_file(path, type):
@@ -279,6 +283,9 @@ if main_config: # empty dict evaluates as false
                 main_config['configs'][subvolume_name]['snapshots'][snapshot_name]['type'] = "init"
 
                 # TODO: send intial snapshot to b2
+                # btrfs_send_snapshot_diff with no "new" path, then
+                # use returned path into b2 updloader tool to do excrytption, compression
+                # and uploads
             else:
                 print("subvolume config {config} already exists. Please use --show-config or --edit config instead".format(config=subvolume_name))
                 sys.exit(1)
@@ -381,8 +388,9 @@ if main_config: # empty dict evaluates as false
                 else:
                     subvolume['snapshots'][snapshot_name]['type'] = "hourly"
                 # # TODO: btrfs send diff between snapshots
-                # send each snapshot diff to tmp directory, encrypt, then upload to B2, then delete from tmp folder
-
+                # btrfs_send_snapshot_diff with no "new" path, then
+                # use returned path into b2 updloader tool to do excrytption, compression
+                # and uploads
             num_snapshots = {'hourly' : 0, 'daily' : 0, 'weekly' : 0, 'monthly' : 0, 'yearly' : 0}
             snapshots_by_type = {'hourly' : {}, 'daily' : {}, 'weekly' : {}, 'monthly' : {}, 'yearly' : {}}
 
