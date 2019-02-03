@@ -1,4 +1,4 @@
-"""BTRFS Snapshot Backup Managerself.
+"""BTRFS Snapshot Backup Manager.
 
 A simple collection of scripts to manage BTRFS snapshots per subvolume and
 incremental backups. Also includes uploading snapshot diffs to b2
