@@ -13,6 +13,16 @@ import logging
 import shutil
 import fcntl
 
+# TODO: refactor code with classes for snapshots and subvolumes. Move to own file
+# TODO: add b2 file as well.
+# TODO: eliminate test.py and only use test dir to hold config and log files
+# TODO: add init, requirements.txt and main stuff.
+# TODO: add command to show shapshot diff changes.
+
+# TODO: provide a mechanism to list all snapshot diffs on server, and list
+# changes. maybe store complete file diff, metadata only diff and shasum of
+# complete file diff on server.
+
 # external files
 # - log = /var/log/btrfs-sbm.log
 # - main settings = /etc/conf.d/btrfs-sbm.toml
@@ -139,7 +149,29 @@ def btrfs_send_snapshot_diff(old, new=None):
         logging.info(f"Sending {old} to {filepath}")
 
     return filepath
-# TODO: implement function to check if there is a difference between btrfs snapshots
+
+def btrfs_snapshot_diff_check(old, new):
+    """Checks if there is a difference between two subvolumes (snapshots)
+
+    Keyword arguments:
+    old -- path to older subvolume (snapshots) as string
+    new -- path to newer subvolume (snapshots) as string.
+
+    returns (bool, string)
+    -- bool = True if there are any material differences between the two snapshots
+    -- string = list of files that changed during shapshot
+    """
+    # TODO: utilize btrfs-snapshot-diff to do this once it is refactored.
+
+def b2_send_file(filepath, subvolume):
+    """Uses b2 python libraries to send snapshot diffs to b2 container
+
+    only send to one bucket since they are limited.
+    Keyword arguments:
+    filepath -- path to snapshot diff file as string
+    subvolume -- which subvolume "folder" to prefix the file with
+    """
+    pass
 
 def read_config_file(path, type):
     """Reads TOML formatted config file safely
