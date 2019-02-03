@@ -30,8 +30,6 @@ import toml
 
 __version__ = "0.0.1"
 
-# TODO: remove in production version
-testing = True
 
 # make sure we are running with at least python 3.6
 assert sys.version_info >= (

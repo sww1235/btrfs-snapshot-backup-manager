@@ -1,5 +1,8 @@
 """Python interface to btrfs-progs commands."""
 
+# TODO: remove in production version
+TESTING = True
+
 
 class Subvolume:
     """Represents a btrfs subvolume."""
@@ -11,7 +14,7 @@ class Subvolume:
         Keyword arguments:
         path -- path to subvolume as string
         """
-        if testing:
+        if TESTING:
             return True
         else:
             return_val = subprocess.run(
@@ -31,7 +34,7 @@ class Subvolume:
         Keyword arguments:
         path -- path to subvolume as string
         """
-        if testing:
+        if TESTING:
             print(f"btrfs subvolume create {path}")
         else:
             subprocess.run(["btrfs", "subvolume", "create", path],
@@ -49,7 +52,7 @@ class Subvolume:
         Keyword arguments:
         path -- path to subvolume as string
         """
-        if testing:
+        if TESTING:
             print(f"btrfs subvolume delete {path}")
         else:
             subprocess.run(["btrfs", "subvolume", "delete", path],
@@ -72,7 +75,7 @@ class Subvolume:
         ro -- whether to take a read only snapshot
         """
         if ro:
-            if testing:
+            if TESTING:
                 print(f"btrfs subvolume snapshot -r {src} {dest}")
             else:
                 return_val = subprocess.run(
@@ -81,7 +84,7 @@ class Subvolume:
                     stderr=subprocess.PIPE)
             logging.info(f"Taking new read only snapshot of {src} at {dest}")
         else:
-            if testing:
+            if TESTING:
                 print(f"btrfs subvolume snapshot {src} {dest}")
             else:
                 return_val = subprocess.run(
@@ -89,7 +92,7 @@ class Subvolume:
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE)
             logging.info(f"Taking new snapshot of {src} at {dest}")
-        if not testing:
+        if not TESTING:
             # log stdout and stderr from btrfs commands
             logging.info(return_val.stdout)
             logging.error(return_val.stderr)
