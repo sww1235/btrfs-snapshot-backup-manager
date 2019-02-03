@@ -14,7 +14,8 @@ from datetime import datetime, timedelta
 
 import toml
 
-# TODO: refactor code with classes for snapshots and subvolumes. Move to own file
+# TODO: refactor code with classes for snapshots and subvolumes.
+# Move to own file
 # TODO: add b2 file as well.
 # TODO: eliminate test.py and only use test dir to hold config and log files
 # TODO: add init, requirements.txt and main stuff.
@@ -37,7 +38,8 @@ testing = True
 # make sure we are running with at least python 3.6
 assert sys.version_info >= (
     3, 6
-), "You are running an old version of python less than version 3.6. Please upgrade or fix the script yourself."
+), "You are running an old version of python less than version 3.6. Please \
+    upgrade or fix the script yourself."
 
 # only let one instance of script run at a time
 lockfile_path = os.path.join("/", "tmp", "btrfs-sbm.lock")
@@ -46,7 +48,8 @@ try:
     fcntl.flock(lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
 except IOError:
     sys.exit(
-        "Multiple instances of script cannot be running at the same time. Try running it again in a few minutes"
+        "Multiple instances of script cannot be running at the same time. Try \
+        running it again in a few minutes"
     )
 
 snapshot_subvol_name = ".snapshots"
@@ -58,7 +61,8 @@ def btrfs_take_snapshot(src, dest, ro):
     Uses btrfs-progs snapshot command to take a snapshot of the src subvolume
     Keyword arguments:
     src -- path to source subvolume as string
-    dest -- path to destination snapshot as string. This includes the name of the snapshot itself.
+    dest -- path to destination snapshot as string. This includes the name of
+    the snapshot itself.
     See the documentation of btrfs subvolume for further details.
     ro -- whether to take a read only snapshot
     """
@@ -128,7 +132,8 @@ def btrfs_create_subvolume(path):
 def btrfs_delete_subvolume(path):
     """Deletes a btrfs subvolume
 
-    Uses btrfs-progs subvolume command to delete a subvolume. Cannot recursively delete subvolumes.
+    Uses btrfs-progs subvolume command to delete a subvolume. Cannot
+    recursively delete subvolumes.
     Keyword arguments:
     path -- path to subvolume as string
     """
@@ -188,7 +193,8 @@ def btrfs_snapshot_diff_check(old, new):
     new -- path to newer subvolume (snapshots) as string.
 
     returns (bool, string)
-    -- bool = True if there are any material differences between the two snapshots
+    -- bool = True if there are any material differences between the
+    two snapshots
     -- string = list of files that changed during shapshot
     """
     # TODO: utilize btrfs-snapshot-diff to do this once it is refactored.
@@ -202,13 +208,21 @@ def b2_send_file(filepath, subvolume):
     filepath -- path to snapshot diff file as string
     subvolume -- which subvolume "folder" to prefix the file with
     """
+    # TODO: implement snapshot backup functionality
+    # send each snapshot diff to tmp directory, encrypt, then upload to B2,
+    # then delete from temp folder
+    # remember: snapshots are full "copies" of subvolume, snapshot diffs
+    # are "diffs"
+    # need all diffs in order to recreate final state.
+    # diffs should only be slighly larger than actual data
     pass
 
 
 def read_config_file(path, type):
     """Reads TOML formatted config file safely
 
-    Checks to make sure file exists before reading. Handles errors if it does not.
+    Checks to make sure file exists before reading. Handles errors if it
+    does not.
     Keyword arguments:
     path -- path of config file as string
     type -- type of config file as string. Default handled differently.
@@ -228,7 +242,8 @@ def read_config_file(path, type):
             logging.critical(f"{type} config file did not exist at {path}!")
         else:
             logging.critical(
-                f"{type} config file did not exist at {path}! Using backup values in script"
+                f"{type} config file did not exist at {path}! Using backup \
+                values in script"
             )
         return {}
 
@@ -251,14 +266,14 @@ action_group.add_argument(
     '--delete-config',
     action='store',
     metavar="config-name",
-    help=
-    "removes config from table in main config file, does not delete snapshot")
+    help="removes config from table in main config file, does not \
+    delete snapshot")
 parser.add_argument(
     '--delete-snapshots',
     action='store_true',
     default=False,
-    help=
-    "combine with --delete-config to delete snapshot directory, does nothing by itself"
+    help="combine with --delete-config to delete snapshot directory, does \
+    nothing by itself"
 )
 action_group.add_argument(
     '--show-config',
@@ -327,15 +342,18 @@ main_config = read_config_file(main_config_file_path, "main")
 
 if not main_config:  # empty dict evaluates as false
     logging.warning(
-        f"main config file not found at {main_config_file_path}. No configs present. \
-    Please run script with --create-config option to create a config. This will create a non empty config file."
+        f"main config file not found at {main_config_file_path}.
+        No configs present.  Please run script with --create-config option
+        to create a
+        config. This will create a non empty config file."
     )
 
 default_config = read_config_file(default_config_file_path, "default")
 
 if not default_config:  # empty dict evaluates as false
     logging.error(
-        f"default config file not found at {default_config_file_path}. Using defaults in script"
+        f"default config file not found at {default_config_file_path}.
+        Using defaults in script"
     )
     default_config = {
         'keep-hourly': 10,
@@ -384,11 +402,8 @@ if main_config:  # empty dict evaluates as false
                 for config, value in default_config.items():
                     # print(config, value)
                     try:
-                        tmp = input(
-                            "How many {snapshot_type} snapshots to keep? (Default={default}): \
-                                    ".format(
-                                snapshot_type=config.split('-')[1],
-                                default=value))
+                        tmp = input(f"How many {config.split('-')[1]} snapshots
+                                    to keep? (Default={value}): ")
                     except SyntaxError:
                         tmp = ""
                     if tmp != "":
@@ -420,18 +435,18 @@ if main_config:  # empty dict evaluates as false
 
                 # TODO: send intial snapshot to b2
                 # btrfs_send_snapshot_diff with no "new" path, then
-                # use returned path into b2 updloader tool to do excrytption, compression
-                # and uploads
+                # use returned path into b2 uploader tool to do excrytption,
+                # compression # and uploads
             else:
-                print(
-                    f"subvolume config {subvolume_name} already exists. Please use --show-config or --edit config instead"
-                )
+                print(f"subvolume config {subvolume_name} already exists.
+                      Please use --show-config or --edit config instead"
+                      )
                 sys.exit(1)
 
         else:
-            print(
-                f"{path} is not a btrfs subvolume. Make sure you typed it correctly"
-            )
+            print(f"{path} is not a btrfs subvolume. Make sure you typed it
+                  correctly"
+                  )
             sys.exit(1)
     elif args.delete_config is not None:
         config_name = args.delete_config
@@ -443,11 +458,9 @@ if main_config:  # empty dict evaluates as false
                     if btrfs_subvolume_exists(snapshot['path']):
                         btrfs_delete_subvolume(snapshot['path'])
                     else:
-                        logging.warning(
-                            "Snapshot: {snapshot} did not exist at {path}. Ignoring"
-                            .format(
-                                snapshot=snapshot['name'],
-                                path=snapshot['path']))
+                        logging.warning(f"Snapshot: {snapshot['name']} did not
+                                        exist at {snapshot['path']}. Ignoring"
+                                        )
                 # delete snapshot directory last
                 snapshot_subvol_path = os.path.join(
                     main_config['configs'][config]['path'],
@@ -455,14 +468,15 @@ if main_config:  # empty dict evaluates as false
                 if btrfs_subvolume_exists(snapshot_subvol_path):
                     btrfs_delete_subvolume(snapshot_subvol_path)
                 else:
-                    logging.warning(
-                        f"{snapshot_subvol_name} subvolume did not exist. This is odd"
-                    )
+                    logging.warning(f"{snapshot_subvol_name} subvolume did not
+                                    exist. This is odd"
+                                    )
             del main_config['configs'][config_name]  # remove dictionary
         else:
-            print(
-                f"{config_name} did not exist in the list of configs. Make sure you typed it correctly or use --list-configs to view available configs"
-            )
+            print(f"{config_name} did not exist in the list of configs. Make
+                  sure you typed it correctly or use --list-configs to view
+                  available configs"
+                  )
             sys.exit(1)
 
     elif args.show_config is not None:
@@ -471,9 +485,10 @@ if main_config:  # empty dict evaluates as false
         if config_name in main_config['configs']:
             print(toml.dumps(main_config['configs'][config_name]))
         else:
-            print(
-                f"{config} did not exist in the list of configs. Make sure you typed it correctly or use --list-configs to view available configs"
-            )
+            print(f"{config} did not exist in the list of configs. Make sure
+                  you typed it correctly or use --list-configs to view
+                  available configs"
+                  )
             sys.exit(1)
 
     elif args.edit_config is not None:
@@ -481,11 +496,12 @@ if main_config:  # empty dict evaluates as false
 
         if config_name in main_config['configs']:
             print(toml.dumps(main_config['configs'][config_name]))
-            #TODO: look into python editor or implement subset myself
+            # TODO: look into python editor or implement subset myself
         else:
-            print(
-                f"{config_name} did not exist in the list of configs. Make sure you typed it correctly or use --list-configs to view available configs"
-            )
+            print(f"{config_name} did not exist in the list of configs. Make
+                  sure you typed it correctly or use --list-configs to view
+                  available configs"
+                  )
             sys.exit(1)
 
     elif args.list_snapshots is not None:
@@ -541,22 +557,26 @@ if main_config:  # empty dict evaluates as false
 
                 if time_now.hour == 0 and not newest_snapshot_time.hour == 0:
                     subvolume['snapshots'][snapshot_name]['type'] = "daily"
-                elif time_now.isoweekday(
-                ) == 1 and not newest_snapshot_time.isoweekday(
-                ) == 1:  # begining of week = monday
+                # begining of week = monday
+                elif (
+                        time_now.isoweekday() == 1
+                        and not newest_snapshot_time.isoweekday() == 1):
                     subvolume['snapshots'][snapshot_name]['type'] = "weekly"
-                elif time_now.day == 1 and not newest_snapshot_time.day == 1:  # first day of month
+                # first day of month
+                elif time_now.day == 1 and not newest_snapshot_time.day == 1:
                     subvolume['snapshots'][snapshot_name]['type'] = "monthly"
-                elif (time_now.month == 1 and time_now.day == 1) and not (
+                # first day of year
+                elif (
+                        (time_now.month == 1 and time_now.day == 1) and not (
                         newest_snapshot_time.month == 1 and
-                        newest_snapshot_time.day == 1):  # first day of year
+                        newest_snapshot_time.day == 1)):
                     subvolume['snapshots'][snapshot_name]['type'] = "yearly"
                 else:
                     subvolume['snapshots'][snapshot_name]['type'] = "hourly"
                 # # TODO: btrfs send diff between snapshots
                 # btrfs_send_snapshot_diff with no "new" path, then
-                # use returned path into b2 updloader tool to do excrytption, compression
-                # and uploads
+                # use returned path into b2 updloader tool to do excrytption,
+                # compression and uploads
             num_snapshots = {
                 'hourly': 0,
                 'daily': 0,
@@ -584,37 +604,36 @@ if main_config:  # empty dict evaluates as false
 
             print(num_snapshots)
 
-            # check if number of snapshots of each type are over limit, and remove oldest
+            # check if number of snapshots of each type are over limit, and
+            # remove oldest
 
             for type, value in num_snapshots.items():
                 if value > subvolume['options']["keep-" + type]:
                     # list of snapshots
-                    # lambda k: k[1]['creation-date-time'] the [1] is essentially selecting the value in the key value pair that is x
-                    # where key = snapshots dict, and value is individual snapshot dict beneath it.
+                    # lambda k: k[1]['creation-date-time'] the [1] is
+                    # essentially selecting the value in the key value pair
+                    # that is x where key = snapshots dict, and value is
+                    # individual snapshot dict beneath it.
                     newlist = sorted(
                         snapshots_by_type[type].items(),
                         key=lambda k: k[1]['creation-date-time'])
                     # delete oldest snapshots up to max
                     for sel in range(value -
                                      subvolume['options']["keep-" + type]):
-                        # newlist is list of tuples (snapshot name, snapshot dict) due to .items()
-                        # need to select tuple within that, then select snapshot dict inside tuple
-                        # print(newlist[sel][1]['path'])
+                        # newlist is list of tuples (snapshot name, snapshot
+                        # dict) due to .items()
+                        # need to select tuple within that, then select
+                        # snapshot dict inside tuple
                         btrfs_delete_subvolume(newlist[sel][1]['path'])
                         del subvolume['snapshots'][newlist[sel][0]]
                 else:
                     pass
                     # print("false")
 
-    # TODO: implement snapshot backup functionality
-    # send each snapshot diff to tmp directory, encrypt, then upload to B2, then delete from temp folder
-    # remember: snapshots are full "copies" of subvolume, snapshot diffs are "diffs"
-    # need all diffs in order to recreate final state.
-    # diffs should only be slighly larger than actual data
-
-    # TODO: check if snapshot diff is empty, if it is discard snapshot. This won't affect
-    # backup stuff, since the btrfs incremental send will be between the previously saved snapshot,
-    # which is the one before deleted snapshot
+    # TODO: check if snapshot diff is empty, if it is discard snapshot.
+    # This won't affect backup stuff, since the btrfs incremental send will be
+    # between the previously saved snapshot, which is the one before
+    # deleted snapshot
 
 else:
     pass  # continue on and save main config file
@@ -623,25 +642,27 @@ if os.path.exists(main_config_file_path):
     try:
         shutil.copy2(main_config_file_path, main_config_file_path + ".bak")
     except IOError as e:
-        logging.critical(
-            f"failed to backup main config file. See exception {e}")
+        logging.critical(f"failed to backup main config file.
+                         See exception {e}"
+                         )
         sys.exit(1)
     try:
         f = open(main_config_file_path, 'w')  # overwrites file
     except IOError as e:
-        logging.critical(
-            f"main config file could not be opened. See exception {e}")
+        logging.critical(f"main config file could not be opened.
+                         See exception {e}"
+                         )
         sys.exit(1)
     toml.dump(main_config, f)  # write config file
 else:
-    logging.warning(
-        f"main config file did not exist. Creating now at {main_config_file_path}."
-    )
+    logging.warning(f"main config file did not exist. Creating now
+                    at {main_config_file_path}."
+                    )
     try:
         f = open(main_config_file_path,
                  'w+')  # create and update file (truncates)
     except IOError as e:
-        logging.critical(
-            f"Could not create new config file at {main_config_file_path}. See exception {e}"
-        )
+        logging.critical(f"Could not create new config file at
+                         {main_config_file_path}. See exception {e}"
+                         )
         sys.exit(1)
