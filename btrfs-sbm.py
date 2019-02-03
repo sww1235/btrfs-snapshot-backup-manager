@@ -47,10 +47,9 @@ lockfile = open(lockfile_path, "a+")
 try:
     fcntl.flock(lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
 except IOError:
-    sys.exit(
-        "Multiple instances of script cannot be running at the same time. Try \
-        running it again in a few minutes"
-    )
+    sys.exit("Multiple instances of script cannot be running at the same "
+             "time. Try running it again in a few minutes"
+             )
 
 snapshot_subvol_name = ".snapshots"
 
@@ -68,7 +67,7 @@ def btrfs_take_snapshot(src, dest, ro):
     """
     if ro:
         if testing:
-            print("btrfs subvolume snapshot -r {src} {dest}")
+            print(f"btrfs subvolume snapshot -r {src} {dest}")
         else:
             return_val = subprocess.run(
                 ["btrfs", "subvolume", "snapshot", "-r", src, dest],
@@ -167,8 +166,9 @@ def btrfs_send_snapshot_diff(old, new=None):
                            stderr=subprocess.PIPE)
             logging.info(return_val.stdout)
             logging.error(return_val.stderr)
-        logging.info(
-            f"Sending difference between {old} and {new} to {filepath}")
+        logging.info(f"Sending difference between {old} and "
+                     f"{new} to {filepath}"
+                     )
     else:
         filename = "init" + "::" + os.path.basename(old)
         filepath = os.path.join(tmp_path, filename)
@@ -241,10 +241,9 @@ def read_config_file(path, type):
         if type != "default":
             logging.critical(f"{type} config file did not exist at {path}!")
         else:
-            logging.critical(
-                f"{type} config file did not exist at {path}! Using backup \
-                values in script"
-            )
+            logging.critical(f"{type} config file did not exist at {path}! "
+                             f"Using backup values in script"
+                             )
         return {}
 
 
@@ -256,62 +255,74 @@ action_group.add_argument(
     '--list-configs',
     action='store_true',
     default=False,
-    help="Prints list of configs")
+    help="Prints list of configs"
+)
 action_group.add_argument(
     '--create-config',
     action='store',
     metavar="/path/to/subvolume",
-    help="Initializes subvolume snapshots and creates config file")
+    help="Initializes subvolume snapshots and creates config file"
+)
 action_group.add_argument(
     '--delete-config',
     action='store',
     metavar="config-name",
-    help="removes config from table in main config file, does not \
-    delete snapshot")
+    help=("removes config from table in main config file, does not"
+          "delete snapshot"
+          )
+)
 parser.add_argument(
     '--delete-snapshots',
     action='store_true',
     default=False,
-    help="combine with --delete-config to delete snapshot directory, does \
-    nothing by itself"
+    help=("combine with --delete-config to delete snapshot directory, does"
+          "nothing by itself"
+          )
 )
 action_group.add_argument(
     '--show-config',
     action='store',
     metavar="config-name",
-    help="prints configuration for specific subvolume")
+    help="prints configuration for specific subvolume"
+)
 action_group.add_argument(
     '--edit-config',
     action='store',
     metavar="config-name",
-    help="prompts to change values configuration for specific subvolume")
+    help="prompts to change values configuration for specific subvolume"
+)
 action_group.add_argument(
     '--list-snapshots',
     action='store',
     metavar="config-name",
-    help="prints all snapshots of config")
+    help="prints all snapshots of config"
+)
 action_group.add_argument(
     '--list-all-snapshots',
     action='store_true',
     default=False,
-    help="print all snapshots in all subvolumes")
+    help="print all snapshots in all subvolumes"
+)
 action_group.add_argument(
     '--delete-snapshot',
     action='store',
     metavar="config-name",
-    help="deletes snapshot from config-name. Snapshot is selected from list")
+    help="deletes snapshot from config-name. Snapshot is selected from list"
+)
 parser.add_argument(
     '--sysconfig-dir',
     action='store',
     metavar="/path/to/configfile",
     help="changes sysconfig directory",
-    default=os.path.join("/", "etc", "conf.d"))
+    default=os.path.join("/", "etc", "conf.d")
+)
 parser.add_argument('--version', action='version', version=__version__)
 parser.add_argument(
     '--log-level',
     action='store',
     default="WARNING",
-    help="sets logging level")
+    help="sets logging level"
+)
 args = parser.parse_args()
 
 if testing:
@@ -341,20 +352,18 @@ default_config = {}
 main_config = read_config_file(main_config_file_path, "main")
 
 if not main_config:  # empty dict evaluates as false
-    logging.warning(
-        f"main config file not found at {main_config_file_path}.
-        No configs present.  Please run script with --create-config option
-        to create a
-        config. This will create a non empty config file."
-    )
+    logging.warning(f"main config file not found at {main_config_file_path}. "
+                    f"No configs present.  Please run script with "
+                    f"--create-config option to create a config. This will "
+                    f"create a non empty config file."
+                    )
 
 default_config = read_config_file(default_config_file_path, "default")
 
 if not default_config:  # empty dict evaluates as false
-    logging.error(
-        f"default config file not found at {default_config_file_path}.
-        Using defaults in script"
-    )
+    logging.error(f"default config file not found at "
+                  f"{default_config_file_path}. Using defaults in script"
+                  )
     default_config = {
         'keep-hourly': 10,
         'keep-daily': 10,
@@ -402,8 +411,8 @@ if main_config:  # empty dict evaluates as false
                 for config, value in default_config.items():
                     # print(config, value)
                     try:
-                        tmp = input(f"How many {config.split('-')[1]} snapshots
-                                    to keep? (Default={value}): ")
+                        tmp = input(f"How many {config.split('-')[1]} "
+                                    f"snapshots to keep? (Default={value}): ")
                     except SyntaxError:
                         tmp = ""
                     if tmp != "":
@@ -438,14 +447,14 @@ if main_config:  # empty dict evaluates as false
                 # use returned path into b2 uploader tool to do excrytption,
                 # compression # and uploads
             else:
-                print(f"subvolume config {subvolume_name} already exists.
-                      Please use --show-config or --edit config instead"
+                print(f"subvolume config {subvolume_name} already exists. "
+                      f"Please use --show-config or --edit config instead"
                       )
                 sys.exit(1)
 
         else:
-            print(f"{path} is not a btrfs subvolume. Make sure you typed it
-                  correctly"
+            print(f"{path} is not a btrfs subvolume. Make sure you typed it "
+                  f"correctly"
                   )
             sys.exit(1)
     elif args.delete_config is not None:
@@ -458,8 +467,9 @@ if main_config:  # empty dict evaluates as false
                     if btrfs_subvolume_exists(snapshot['path']):
                         btrfs_delete_subvolume(snapshot['path'])
                     else:
-                        logging.warning(f"Snapshot: {snapshot['name']} did not
-                                        exist at {snapshot['path']}. Ignoring"
+                        logging.warning(f"Snapshot: {snapshot['name']} did "
+                                        f"not exist at {snapshot['path']}."
+                                        f"Ignoring"
                                         )
                 # delete snapshot directory last
                 snapshot_subvol_path = os.path.join(
@@ -468,14 +478,14 @@ if main_config:  # empty dict evaluates as false
                 if btrfs_subvolume_exists(snapshot_subvol_path):
                     btrfs_delete_subvolume(snapshot_subvol_path)
                 else:
-                    logging.warning(f"{snapshot_subvol_name} subvolume did not
-                                    exist. This is odd"
+                    logging.warning(f"{snapshot_subvol_name} subvolume did "
+                                    f"not exist. This is odd"
                                     )
             del main_config['configs'][config_name]  # remove dictionary
         else:
-            print(f"{config_name} did not exist in the list of configs. Make
-                  sure you typed it correctly or use --list-configs to view
-                  available configs"
+            print(f"{config_name} did not exist in the list of configs. Make "
+                  f"sure you typed it correctly or use --list-configs to view "
+                  f"available configs"
                   )
             sys.exit(1)
 
@@ -485,9 +495,9 @@ if main_config:  # empty dict evaluates as false
         if config_name in main_config['configs']:
             print(toml.dumps(main_config['configs'][config_name]))
         else:
-            print(f"{config} did not exist in the list of configs. Make sure
-                  you typed it correctly or use --list-configs to view
-                  available configs"
+            print(f"{config_name} did not exist in the list of configs. Make "
+                  f"sure you typed it correctly or use --list-configs to view "
+                  f"available configs"
                   )
             sys.exit(1)
 
@@ -498,9 +508,9 @@ if main_config:  # empty dict evaluates as false
             print(toml.dumps(main_config['configs'][config_name]))
             # TODO: look into python editor or implement subset myself
         else:
-            print(f"{config_name} did not exist in the list of configs. Make
-                  sure you typed it correctly or use --list-configs to view
-                  available configs"
+            print(f"{config_name} did not exist in the list of configs. Make "
+                  f"sure you typed it correctly or use --list-configs to view "
+                  f"available configs"
                   )
             sys.exit(1)
 
@@ -642,27 +652,27 @@ if os.path.exists(main_config_file_path):
     try:
         shutil.copy2(main_config_file_path, main_config_file_path + ".bak")
     except IOError as e:
-        logging.critical(f"failed to backup main config file.
-                         See exception {e}"
+        logging.critical(f"failed to backup main config file. "
+                         f"See exception {e}"
                          )
         sys.exit(1)
     try:
         f = open(main_config_file_path, 'w')  # overwrites file
     except IOError as e:
-        logging.critical(f"main config file could not be opened.
-                         See exception {e}"
+        logging.critical(f"main config file could not be opened. "
+                         f"See exception {e}"
                          )
         sys.exit(1)
     toml.dump(main_config, f)  # write config file
 else:
-    logging.warning(f"main config file did not exist. Creating now
-                    at {main_config_file_path}."
+    logging.warning(f"main config file did not exist. Creating now "
+                    f"at {main_config_file_path}."
                     )
     try:
         f = open(main_config_file_path,
                  'w+')  # create and update file (truncates)
     except IOError as e:
-        logging.critical(f"Could not create new config file at
-                         {main_config_file_path}. See exception {e}"
+        logging.critical(f"Could not create new config file at "
+                         f"{main_config_file_path}. See exception {e}"
                          )
         sys.exit(1)
