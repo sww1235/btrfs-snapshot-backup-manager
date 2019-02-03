@@ -13,9 +13,10 @@ from datetime import datetime, timedelta
 import toml
 
 # TODO: refactor code with classes for snapshots and subvolumes.
+# TODO: when list of snapshots is read from config file, use exists() to verify
+# they exist on disk.
 # Move to own file
 # TODO: add b2 file as well.
-# TODO: eliminate test.py and only use test dir to hold config and log files
 # TODO: add init, requirements.txt and main stuff.
 # TODO: add command to show shapshot diff changes.
 
