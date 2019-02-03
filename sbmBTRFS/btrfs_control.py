@@ -7,8 +7,16 @@ TESTING = True
 class Subvolume:
     """Represents a btrfs subvolume."""
 
-    def exists(self, path):
-        """Check if path is a btrfs subvolume.
+    def __init__(self, path):
+        """Initialize Subvolume class at path.
+
+        This is used to create subvolume objects only, and may not represent a
+        physical on-disk subvolume.
+        """
+        self.path = path
+
+    def exists(self):
+        """Check if subvolume object corresponds to an actual subvolume.
 
         Uses btrfs subvolume show command to detect if a subvolume exists
         Keyword arguments:
@@ -18,7 +26,7 @@ class Subvolume:
             return True
         else:
             return_val = subprocess.run(
-                ["btrfs", "subvolume", "show", subvolume_path],
+                ["btrfs", "subvolume", "show", self.path],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.PIPE)
             if return_val.returncode != 0:
@@ -27,6 +35,7 @@ class Subvolume:
             else:
                 return True
 
+    @staticmethod
     def create(path):
         """Create a btrfs subvolume at path.
 
@@ -44,7 +53,7 @@ class Subvolume:
             logging.error(return_val.stderr)
         logging.info(f"Creating new subvolume at {path}")
 
-    def delete(path):
+    def delete(self):
         """Delete a btrfs subvolume at path.
 
         Uses btrfs-progs subvolume command to delete a subvolume. Cannot
@@ -62,7 +71,7 @@ class Subvolume:
             logging.error(return_val.stderr)
         logging.info(f"Deleting subvolume at {path}")
 
-    def btrfs_take_snapshot(src, dest, ro):
+    def btrfs_take_snapshot(self, src, dest, ro):
         """Take a snapshot of a btrfs subvolume.
 
         Uses btrfs-progs snapshot command to take a snapshot of the src
@@ -100,3 +109,10 @@ class Subvolume:
 
 class Snapshot(Subvolume):
     """Represents a btrfs snapshot, which is a special case of subvolume."""
+
+    def __init__(self, name, snapshot_type, creation_date_time):
+        """Initialize Snapshot class."""
+        self.name = name
+        self.snapshot_type = snapshot_type
+        self.creation_date_time = creation_date_time
+        super().__init__(self)  # add instance variables from superclass
