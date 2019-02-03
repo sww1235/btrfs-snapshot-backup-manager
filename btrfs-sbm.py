@@ -3,15 +3,16 @@
 Script for managing btrfs snapshots and backups with backblaze b2
 """
 
-import toml
 import argparse
-import subprocess
+import fcntl
+import logging
 import os.path
+import shutil
+import subprocess
 import sys
 from datetime import datetime, timedelta
-import logging
-import shutil
-import fcntl
+
+import toml
 
 # TODO: refactor code with classes for snapshots and subvolumes. Move to own file
 # TODO: add b2 file as well.
