@@ -28,7 +28,7 @@ import toml
 # - main settings = /etc/conf.d/btrfs-sbm.toml
 # - default settings = /etc/conf.d/btrfs-sbm-default.toml (read only)
 
-__version__ = "0.0.1"
+__version__ = "0.1.1"
 
 
 # make sure we are running with at least python 3.6
