@@ -1,5 +1,7 @@
 # btrfs-snapshot-backup-manager
-A simple collection of scripts to manage BTRFS snapshots per subvolume and incremental backups.
+
+A simple collection of scripts to manage BTRFS snapshots per subvolume and
+incremental backups. Also includes uploading snapshot diffs to b2 cloud storage.
 
 
 ## Objectives
