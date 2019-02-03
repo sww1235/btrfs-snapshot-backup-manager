@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Script for managing btrfs snapshots and backups with backblaze b2
-"""
+"""Script for managing btrfs snapshots and backups with backblaze b2."""
 
 import argparse
 import fcntl
@@ -55,7 +53,7 @@ snapshot_subvol_name = ".snapshots"
 
 
 def btrfs_take_snapshot(src, dest, ro):
-    """take btrfs snapshot
+    """Take a snapshot of a btrfs subvolume.
 
     Uses btrfs-progs snapshot command to take a snapshot of the src subvolume
     Keyword arguments:
@@ -90,7 +88,7 @@ def btrfs_take_snapshot(src, dest, ro):
 
 
 def btrfs_subvolume_exists(path):
-    """Checks if path is a btrfs subvolume
+    """Check if path is a btrfs subvolume.
 
     Uses btrfs subvolume show command to detect if a subvolume exists
     Keyword arguments:
@@ -111,7 +109,7 @@ def btrfs_subvolume_exists(path):
 
 
 def btrfs_create_subvolume(path):
-    """Creates a btrfs subvolume
+    """Create a btrfs subvolume at path.
 
     Uses btrfs-progs subvolume command to create a new subvolume
     Keyword arguments:
@@ -129,7 +127,7 @@ def btrfs_create_subvolume(path):
 
 
 def btrfs_delete_subvolume(path):
-    """Deletes a btrfs subvolume
+    """Delete a btrfs subvolume at path.
 
     Uses btrfs-progs subvolume command to delete a subvolume. Cannot
     recursively delete subvolumes.
@@ -148,7 +146,7 @@ def btrfs_delete_subvolume(path):
 
 
 def btrfs_send_snapshot_diff(old, new=None):
-    """Outputs diff between two subvolumes (snapshots) to a file
+    """Output diff between two subvolumes (snapshots) to a file.
 
     Keyword arguments:
     old -- path to older subvolume (snapshots) as string
@@ -186,7 +184,7 @@ def btrfs_send_snapshot_diff(old, new=None):
 
 
 def btrfs_snapshot_diff_check(old, new):
-    """Checks if there is a difference between two subvolumes (snapshots)
+    """Check if there is a difference between two subvolumes (snapshots).
 
     Keyword arguments:
     old -- path to older subvolume (snapshots) as string
@@ -201,7 +199,7 @@ def btrfs_snapshot_diff_check(old, new):
 
 
 def b2_send_file(filepath, subvolume):
-    """Uses b2 python libraries to send snapshot diffs to b2 container
+    """Use b2 python libraries to send snapshot diffs to b2 container.
 
     only send to one bucket since they are limited.
     Keyword arguments:
@@ -219,7 +217,7 @@ def b2_send_file(filepath, subvolume):
 
 
 def read_config_file(path, type):
-    """Reads TOML formatted config file safely
+    """Read TOML formatted config file safely.
 
     Checks to make sure file exists before reading. Handles errors if it
     does not.
