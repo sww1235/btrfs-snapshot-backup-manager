@@ -87,7 +87,7 @@ class Subvolume:
         """
         if self.exists:
             time_now = datetime.now()
-            subvolume_name =
+            snapshot_name = self.name + "-" + time_now.isoformat()
             if ro:
                 if TESTING:
                     print(f"btrfs subvolume snapshot -r {self.path} {dest}")
@@ -113,16 +113,19 @@ class Subvolume:
                 # log stdout and stderr from btrfs commands
                 logging.info(return_val.stdout)
                 logging.error(return_val.stderr)
+        else:
+            logging.error(f"subvolume {self.name} does not exist on disk.")
 
 
 class Snapshot(Subvolume):
     """Represents a btrfs snapshot, which is a special case of subvolume."""
 
-    def __init__(self, name, snapshot_type, creation_date_time, read_only):
+    def __init__(self, name, snapshot_type, creation_date_time, subvolume,
+                 read_only):
         """Initialize Snapshot class."""
         self.name = name
         self.snapshot_type = snapshot_type
         self.creation_date_time = creation_date_time
         self.read_only = read_only
-        self.subvolume = super()  # is this right?
+        self.subvolume = subvolume
         super().__init__(self)  # add instance variables from superclass
