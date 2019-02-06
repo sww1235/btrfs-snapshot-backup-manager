@@ -117,6 +117,44 @@ class Subvolume:
         else:
             logging.error(f"subvolume {self.name} does not exist on disk.")
 
+    def btrfs_send_snapshot_diff(self, new=None):
+        """Output diff between two subvolumes (snapshots) to a file.
+
+        Keyword arguments:
+        new -- path to newer subvolume (snapshots) as string. (optional)
+        """
+        tmp_path = os.path.join("/", "tmp")
+        if new:
+            filename = (os.path.basename(self.path)
+                        + "::"
+                        + os.path.basename(new))
+            filepath = os.path.join(tmp_path, filename)
+            if testing:
+                print(f"btrfs send -p {old} -f {filepath} {new}")
+            else:
+                subprocess.run(["btrfs", "send", "-p", old, "-f", filename, new],
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
+                logging.info(return_val.stdout)
+                logging.error(return_val.stderr)
+            logging.info(f"Sending difference between {old} and "
+                         f"{new} to {filepath}"
+                         )
+        else:
+            filename = "init" + "::" + os.path.basename(old)
+            filepath = os.path.join(tmp_path, filename)
+            if testing:
+                print(f"btrfs send -f {filepath} {old}")
+            else:
+                subprocess.run(["btrfs", "send", "-f", filepath, old],
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
+                logging.info(return_val.stdout)
+                logging.error(return_val.stderr)
+            logging.info(f"Sending {old} to {filepath}")
+
+        return filepath
+
 
 class Snapshot(Subvolume):
     """Represents a btrfs snapshot, which is a special case of subvolume."""

@@ -51,44 +51,6 @@ except IOError:
 snapshot_subvol_name = ".snapshots"
 
 
-def btrfs_send_snapshot_diff(old, new=None):
-    """Output diff between two subvolumes (snapshots) to a file.
-
-    Keyword arguments:
-    old -- path to older subvolume (snapshots) as string
-    new -- path to newer subvolume (snapshots) as string. (optional)
-    """
-    tmp_path = os.path.join("/", "tmp")
-    if new:
-        filename = os.path.basename(old) + "::" + os.path.basename(new)
-        filepath = os.path.join(tmp_path, filepath)
-        if testing:
-            print(f"btrfs send -p {old} -f {filepath} {new}")
-        else:
-            subprocess.run(["btrfs", "send", "-p", old, "-f", filename, new],
-                           stdout=subprocess.PIPE,
-                           stderr=subprocess.PIPE)
-            logging.info(return_val.stdout)
-            logging.error(return_val.stderr)
-        logging.info(f"Sending difference between {old} and "
-                     f"{new} to {filepath}"
-                     )
-    else:
-        filename = "init" + "::" + os.path.basename(old)
-        filepath = os.path.join(tmp_path, filename)
-        if testing:
-            print(f"btrfs send -f {filepath} {old}")
-        else:
-            subprocess.run(["btrfs", "send", "-f", filepath, old],
-                           stdout=subprocess.PIPE,
-                           stderr=subprocess.PIPE)
-            logging.info(return_val.stdout)
-            logging.error(return_val.stderr)
-        logging.info(f"Sending {old} to {filepath}")
-
-    return filepath
-
-
 def btrfs_snapshot_diff_check(old, new):
     """Check if there is a difference between two subvolumes (snapshots).
 
