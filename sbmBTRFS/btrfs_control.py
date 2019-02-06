@@ -93,7 +93,8 @@ class Subvolume:
                     print(f"btrfs subvolume snapshot -r {self.path} {dest}")
                 else:
                     return_val = subprocess.run(
-                        ["btrfs", "subvolume", "snapshot", "-r", self.path, dest],
+                        ["btrfs", "subvolume", "snapshot", "-r",
+                            self.path, dest],
                         stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE)
                 logging.info(f"Taking new read only snapshot of "
