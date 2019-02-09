@@ -542,3 +542,5 @@ else:
                          f"{main_config_file_path}. See exception {e}"
                          )
         sys.exit(1)
+
+logging.shutdown()
