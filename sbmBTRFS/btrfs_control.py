@@ -16,9 +16,14 @@ class Subvolume:
         """
         self.path = path
         self.name = name
-        self.physical = self.exists()
+        self.physical = self.physical()
 
-    def exists(self):
+    def __repr__(self):
+        """Return string representation of class."""
+        return f"Subvolume {self.name} at {self.path}"
+
+    @property
+    def physical(self):
         """Check if subvolume object corresponds to an actual subvolume.
 
         Uses btrfs subvolume show command to detect if a subvolume exists
@@ -64,15 +69,16 @@ class Subvolume:
         Keyword arguments:
         path -- path to subvolume as string
         """
-        if TESTING:
-            print(f"btrfs subvolume delete {path}")
-        else:
-            subprocess.run(["btrfs", "subvolume", "delete", path],
-                           stdout=subprocess.PIPE,
-                           stderr=subprocess.PIPE)
-            logging.info(return_val.stdout)
-            logging.error(return_val.stderr)
-        logging.info(f"Deleting subvolume at {path}")
+        if self.physical:
+            if TESTING:
+                print(f"btrfs subvolume delete {path}")
+            else:
+                subprocess.run(["btrfs", "subvolume", "delete", path],
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
+                logging.info(return_val.stdout)
+                logging.error(return_val.stderr)
+            logging.info(f"Deleting subvolume at {path}")
 
     def btrfs_take_snapshot(self, dest, ro):
         """Take a snapshot of a btrfs subvolume.
@@ -85,7 +91,7 @@ class Subvolume:
         See the documentation of btrfs subvolume for further details.
         ro -- whether to take a read only snapshot
         """
-        if self.exists:
+        if self.physical:
             time_now = datetime.now()
             snapshot_name = self.name + "-" + time_now.isoformat()
             if ro:
