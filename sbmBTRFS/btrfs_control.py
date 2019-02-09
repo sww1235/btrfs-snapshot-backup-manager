@@ -220,4 +220,48 @@ class Snapshot(Subvolume):
         self.creation_date_time = creation_date_time
         self.read_only = read_only
         self.subvolume = subvolume
+        self._snapshots = None  # don't want snapshots of snapshots
         super().__init__(self)  # add instance variables from superclass
+
+    def __repr__(self):
+        """Return string representation of class."""
+        return f"Snapshot {self.name} of {self.type} at {self.path}"
+
+    def __eq__(self, other):
+        """Check if Snapshots are equal."""
+        return (self.path == other.path
+                and self.name == other.name
+                and self.subvolume == other.subvolume
+                and self.creation_date_time == other.creation_date_time
+                and self.snapshot_type == other.snapshot_type
+                and self.read_only == other.read_only
+                )
+        # TODO: this should probably use the btrfs_snapshot_diff_check method
+
+    def __lt__(self, other):
+        """Check if Subvolumes are less than another subvolume.
+
+        This is defined as being created earlier than the other
+        """
+        return self.creation_date_time < other.creation_date_time
+
+    def btrfs_take_snapshot(self, dest, ro):
+        """Don't want snapshots of snapshots."""
+        logging.error(f"No snapshots of snapshots plox. {self.name}"
+                      f"is a snapshot. This is an error"
+                      )
+        return None
+
+    def btrfs_snapshot_diff_check(self, new):
+        """Check if there is a difference between two snapshots (Subvolumes).
+
+        Keyword arguments:
+        new -- snapshot object.
+
+        returns (bool, string)
+        -- bool = True if there are any material differences between the
+        two snapshots
+        -- string = list of files that changed during shapshot
+        """
+        # TODO: utilize btrfs-snapshot-diff to do this once it is refactored.
+        pass
