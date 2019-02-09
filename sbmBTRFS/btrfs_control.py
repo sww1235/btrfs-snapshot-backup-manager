@@ -1,9 +1,18 @@
 """Python interface to btrfs-progs commands."""
 
+from functools import total_ordering  # help with sorting methods
+
+import os.path
+
+from datetime import datetime, timedelta
+
+import subprocess  # Calling btrfs commands
+
 # TODO: remove in production version
 TESTING = True
 
 
+# TODO: Need to capture errors from btrfs commands as exceptions
 class Subvolume:
     """Represents a btrfs subvolume."""
 
@@ -16,17 +25,42 @@ class Subvolume:
         """
         self.path = path
         self.name = name
-        self.physical = self.physical()
+        # if the subvolume physically exists, otherwise create it
+        if self.exists():
+            self.physical = True
+        else:
+            self.create()
+            self.physical = True
+        self._snapshots = []
 
     def __repr__(self):
         """Return string representation of class."""
         return f"Subvolume {self.name} at {self.path}"
 
-    @property
-    def physical(self):
+    def __len__(self):
+        """Length Method for iterating Snapshots in Subvolume."""
+        return len(self._snapshots)
+
+    def __getitem__(self, position):
+        """Return a Snapshot associated with Subvolume."""
+        return self._snapshots[position]
+
+    def __eq__(self, other):
+        """Check if Subvolumes are equal."""
+        return self.path == other.path and self.name == other.name
+
+    def __lt__(self, other):
+        """Check if Subvolumes are less than another subvolume.
+
+        Not implemented.
+        """
+        return NotImplemented
+
+    def exists(self):
         """Check if subvolume object corresponds to an actual subvolume.
 
-        Uses btrfs subvolume show command to detect if a subvolume exists
+        Uses btrfs subvolume show command to detect if a subvolume exists.
+        This will work on snapshots as well.
         """
         if TESTING:
             return True
@@ -41,25 +75,22 @@ class Subvolume:
             else:
                 return True
 
-    @classmethod
-    def create(cls, path):
+    def create(self):
         """Create a btrfs subvolume at path.
 
         Uses btrfs-progs subvolume command to create a new subvolume
-        Keyword arguments:
-        path -- path to subvolume as string
         """
         if TESTING:
-            print(f"btrfs subvolume create {path}")
+            print(f"btrfs subvolume create {self.path}")
         else:
-            subprocess.run(["btrfs", "subvolume", "create", path],
+            subprocess.run(["btrfs", "subvolume", "create", self.path],
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
             logging.info(return_val.stdout)
             logging.error(return_val.stderr)
-        logging.info(f"Creating new subvolume at {path}")
-        subvolume_name = os.path.basename(os.path.normpath(path))
-        return cls(path, subvolume_name)
+        logging.info(f"Creating new subvolume at {self.path}")
+        subvolume_name = os.path.basename(os.path.normpath(self.path))
+        return cls(self.path, subvolume_name)
 
     def delete(self):
         """Delete a btrfs subvolume at path.
@@ -71,16 +102,20 @@ class Subvolume:
         """
         if self.physical:
             if TESTING:
-                print(f"btrfs subvolume delete {path}")
+                print(f"btrfs subvolume delete {self.path}")
             else:
-                subprocess.run(["btrfs", "subvolume", "delete", path],
+                subprocess.run(["btrfs", "subvolume", "delete", self.path],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
                 logging.info(return_val.stdout)
                 logging.error(return_val.stderr)
-            logging.info(f"Deleting subvolume at {path}")
+            logging.info(f"Deleting subvolume at {self.path}")
+        else:
+            logging.error(f"Could not delete subvolume at {self.path}."
+                          f"Did not exist on disk"
+                          )
 
-    def btrfs_take_snapshot(self, dest, ro):
+    def btrfs_take_snapshot(self, dest, type_, ro):
         """Take a snapshot of a btrfs subvolume.
 
         Uses btrfs-progs snapshot command to take a snapshot of the src
@@ -89,8 +124,14 @@ class Subvolume:
         dest -- path to destination snapshot as string. This includes the name
         of the snapshot itself.
         See the documentation of btrfs subvolume for further details.
+        type -- indicates type of snapshot
         ro -- whether to take a read only snapshot
+        Returns a snapshot object.
         """
+        # TODO: check if snapshot diff is empty, if it is discard snapshot.
+        # This won't affect backup stuff, since the btrfs incremental send
+        # will be between the previously saved snapshot, which is the one
+        # before deleted snapshot
         if self.physical:
             time_now = datetime.now()
             snapshot_name = self.name + "-" + time_now.isoformat()
@@ -106,7 +147,6 @@ class Subvolume:
                 logging.info(f"Taking new read only snapshot of "
                              f"{self.path} at {dest}"
                              )
-                return Snapshot()
             else:
                 if TESTING:
                     print(f"btrfs subvolume snapshot {self.path} {dest}")
@@ -120,48 +160,55 @@ class Subvolume:
                 # log stdout and stderr from btrfs commands
                 logging.info(return_val.stdout)
                 logging.error(return_val.stderr)
+        return Snapshot(snapshot_name, type_, time_now, self, ro)
         else:
             logging.error(f"subvolume {self.name} does not exist on disk.")
+            return None
 
     def btrfs_send_snapshot_diff(self, new=None):
         """Output diff between two subvolumes (snapshots) to a file.
 
         Keyword arguments:
-        new -- path to newer subvolume (snapshots) as string. (optional)
+        new -- snapshot object. (optional)
         """
+        # TODO: Should this verify if new snapshot is actually newer?
         tmp_path = os.path.join("/", "tmp")
-        if new:
-            filename = (os.path.basename(self.path)
-                        + "::"
-                        + os.path.basename(new))
-            filepath = os.path.join(tmp_path, filename)
+        # both snapshots exist on disk
+        if new and new.physical and self.physical:
+            diff_filename = (self.name + "::" + new.name)
+            diff_filepath = os.path.join(tmp_path, diff_filename)
             if testing:
-                print(f"btrfs send -p {old} -f {filepath} {new}")
+                print(f"btrfs send -p {self.path} -f {diff_filepath} "
+                      f"{new.path}"
+                      )
             else:
-                subprocess.run(["btrfs", "send", "-p", old, "-f", filename, new],
+                subprocess.run(["btrfs", "send", "-p", self.path, "-f",
+                                diff_filepath, new.path],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
                 logging.info(return_val.stdout)
                 logging.error(return_val.stderr)
-            logging.info(f"Sending difference between {old} and "
-                         f"{new} to {filepath}"
+            logging.info(f"Sending difference between {self.name} and "
+                         f"{new.name} to {diff_filepath}"
                          )
-        else:
-            filename = "init" + "::" + os.path.basename(old)
-            filepath = os.path.join(tmp_path, filename)
+        elif self.physical:
+            diff_filename = "init" + "::" + self.name
+            diff_filepath = os.path.join(tmp_path, diff_filename)
             if testing:
-                print(f"btrfs send -f {filepath} {old}")
+                print(f"btrfs send -f {diff_filepath} {self.path}")
             else:
-                subprocess.run(["btrfs", "send", "-f", filepath, old],
+                subprocess.run(["btrfs", "send", "-f", diff_filepath,
+                               self.path],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
                 logging.info(return_val.stdout)
                 logging.error(return_val.stderr)
-            logging.info(f"Sending {old} to {filepath}")
+            logging.info(f"Sending {self.name} to {diff_filepath}")
 
-        return filepath
+        return filepath  # return path of snapshot diff
 
 
+@total_ordering  # add extra comparison operators
 class Snapshot(Subvolume):
     """Represents a btrfs snapshot, which is a special case of subvolume."""
 
