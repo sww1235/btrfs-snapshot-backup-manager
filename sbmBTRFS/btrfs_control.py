@@ -1,12 +1,9 @@
 """Python interface to btrfs-progs commands."""
 
-from functools import total_ordering  # help with sorting methods
-
 import os.path
-
-from datetime import datetime, timedelta
-
 import subprocess  # Calling btrfs commands
+from datetime import datetime, timedelta
+from functools import total_ordering  # help with sorting methods
 
 # TODO: remove in production version
 TESTING = True
