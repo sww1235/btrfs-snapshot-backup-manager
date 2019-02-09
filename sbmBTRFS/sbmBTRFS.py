@@ -54,21 +54,6 @@ except IOError:
 snapshot_subvol_name = ".snapshots"
 
 
-def btrfs_snapshot_diff_check(old, new):
-    """Check if there is a difference between two subvolumes (snapshots).
-
-    Keyword arguments:
-    old -- path to older subvolume (snapshots) as string
-    new -- path to newer subvolume (snapshots) as string.
-
-    returns (bool, string)
-    -- bool = True if there are any material differences between the
-    two snapshots
-    -- string = list of files that changed during shapshot
-    """
-    # TODO: utilize btrfs-snapshot-diff to do this once it is refactored.
-
-
 def b2_send_file(filepath, subvolume):
     """Use b2 python libraries to send snapshot diffs to b2 container.
 
@@ -509,10 +494,6 @@ if main_config:  # empty dict evaluates as false
                     pass
                     # print("false")
 
-    # TODO: check if snapshot diff is empty, if it is discard snapshot.
-    # This won't affect backup stuff, since the btrfs incremental send will be
-    # between the previously saved snapshot, which is the one before
-    # deleted snapshot
 
 else:
     pass  # continue on and save main config file
