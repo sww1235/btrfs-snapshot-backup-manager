@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Script for managing btrfs snapshots and backups with backblaze b2."""
 
-import argparse
-import fcntl
+import argparse  # command line arguments
+import fcntl  # lock files
 import logging
 import os.path
-import shutil
+import shutil  # config file backups
 import subprocess
 import sys
 from datetime import datetime, timedelta
@@ -30,6 +30,9 @@ import toml
 # - default settings = /etc/conf.d/btrfs-sbm-default.toml (read only)
 
 __version__ = "0.1.1"
+
+# TODO: remove in production version
+TESTING = True
 
 
 # make sure we are running with at least python 3.6
@@ -191,7 +194,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-if testing:
+if TESTING:
     main_config_file_path = "./btrfs-sbm.toml"
     default_config_file_path = "./btrfs-sbm-default.toml"
 else:
@@ -199,7 +202,7 @@ else:
     default_config_file_path = os.path.join(args.sysconfig_dir,
                                             "btrfs-sbm-default.toml")
 
-if testing:
+if TESTING:
     log_Path = "./testlog.log"
 else:
     log_Path = os.path.join("/", "var", "log", "btrfs-sbm.log")
