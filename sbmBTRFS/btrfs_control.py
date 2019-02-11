@@ -14,7 +14,7 @@ TESTING = True
 class Subvolume:
     """Represents a btrfs subvolume."""
 
-    def __init__(self, path, name):
+    def __init__(self, path, name, hourly, daily, weekly, monthly, yearly):
         """Initialize Subvolume class at path.
 
         This is used to create subvolume objects only, and may not represent a
@@ -23,6 +23,11 @@ class Subvolume:
         """
         self.path = path
         self.name = name
+        self.keep_hourly = hourly
+        self.keep_daily = daily
+        self.keep_weekly = weekly
+        self.keep_monthly = monthly
+        self.keep_yearly = yearly
         # if the subvolume physically exists, otherwise create it
         if self.exists():
             self.physical = True
