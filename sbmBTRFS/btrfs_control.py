@@ -168,6 +168,17 @@ class Subvolume:
             logging.error(f"subvolume {self.name} does not exist on disk.")
             return None
 
+    def append_snapshot(self, snaphot):
+        """Append precreated snapshot object to list of snapshots.
+
+        currently only used when reading existing config file
+        """
+        self._snapshots.append(snapshot)
+
+    def sort(self):
+        """Sort snapshots in Subvolume."""
+        self._snapshots.sort()
+
     def btrfs_send_snapshot_diff(self, new=None):
         """Output diff between two subvolumes (snapshots) to a file.
 
