@@ -107,65 +107,65 @@ def read_config_file(path, type_):
 
 parser = argparse.ArgumentParser()
 action_group = parser.add_mutually_exclusive_group()
-action_group.add_argument(
-    '--list-configs',
+action_group.add_argument(  # list subvolumes
+    '--list-subvolumes',
     action='store_true',
     default=False,
-    help="Prints list of configs"
+    help="Prints list of snapshots"
 )
-action_group.add_argument(
-    '--create-config',
+action_group.add_argument(  # init subvolume
+    '--init-subvolume',
     action='store',
     metavar="/path/to/subvolume",
-    help="Initializes subvolume snapshots and creates config file"
+    help="Initializes subvolume with initial snapshot and configuration"
 )
-action_group.add_argument(
-    '--delete-config',
+action_group.add_argument(  # delete subvolumes
+    '--delete-subvolume',
     action='store',
     metavar="config-name",
-    help=("removes config from table in main config file, does not"
-          "delete snapshot"
+    help=("removes subvolume from list in main config file, does not"
+          "delete associated snapshots"
           )
 )
-parser.add_argument(
+parser.add_argument(  # delete snapshot
     '--delete-snapshots',
     action='store_true',
     default=False,
-    help=("combine with --delete-config to delete snapshot directory, does"
+    help=("combine with --delete-subvolume to delete snapshot directory, does"
           "nothing by itself"
           )
 )
-action_group.add_argument(
-    '--show-config',
+action_group.add_argument(  # show subvolume
+    '--show-subvolume',
     action='store',
     metavar="config-name",
     help="prints configuration for specific subvolume"
 )
-action_group.add_argument(
-    '--edit-config',
+action_group.add_argument(  # edit subvolume
+    '--edit-subvolume',
     action='store',
     metavar="config-name",
     help="prompts to change values configuration for specific subvolume"
 )
-action_group.add_argument(
+action_group.add_argument(  # list snapshot
     '--list-snapshots',
     action='store',
     metavar="config-name",
-    help="prints all snapshots of config"
+    help="prints all snapshots of subvolume"
 )
-action_group.add_argument(
+action_group.add_argument(  # list all snapshots
     '--list-all-snapshots',
     action='store_true',
     default=False,
     help="print all snapshots in all subvolumes"
 )
-action_group.add_argument(
+action_group.add_argument(  # delete snapshot
     '--delete-snapshot',
     action='store',
     metavar="config-name",
-    help="deletes snapshot from config-name. Snapshot is selected from list"
+    help="deletes snapshot from subvolume. Snapshot is selected from list"
 )
-parser.add_argument(
+parser.add_argument(  # sysconfig dir
     '--sysconfig-dir',
     action='store',
     metavar="/path/to/configfile",
@@ -173,7 +173,7 @@ parser.add_argument(
     default=os.path.join("/", "etc", "conf.d")
 )
 parser.add_argument('--version', action='version', version=__version__)
-parser.add_argument(
+parser.add_argument(  # log level
     '--log-level',
     action='store',
     default="WARNING",
@@ -251,7 +251,7 @@ if main_config:  # empty dict evaluates as false
     subvolumes.sort()  # alphabetize subvolume objects in list
 
     # main command select
-    if args.list_configs:
+    if args.list_subvolumes:
         """Lists subvolume configurations"""
         fmt_string = "{name:<10}|{path:<20}"
         print(fmt_string.format(name="Config", path="Subvolume Path"))
@@ -260,9 +260,10 @@ if main_config:  # empty dict evaluates as false
         for key, subvol in main_config['configs'].items(
         ):  # subvol is dict representing individual config
             print(fmt_string.format(name=subvol['name'], path=subvol['path']))
-    elif args.create_config is not None:
+
+    elif args.init_subvolume is not None:
         """Initializes subvolume backups"""
-        subvolume_path = args.create_config
+        subvolume_path = args.init_subvolume
         if btrfs_subvolume_exists(subvolume_path):
 
             time_now = datetime.now()
@@ -333,8 +334,9 @@ if main_config:  # empty dict evaluates as false
                   f"correctly"
                   )
             sys.exit(1)
-    elif args.delete_config is not None:
-        config_name = args.delete_config
+
+    elif args.delete_subvolume is not None:
+        config_name = args.delete_subvolume
 
         if config_name in main_config['configs']:
             if args.delete_snapshots:  # also delete snapshots
@@ -365,8 +367,8 @@ if main_config:  # empty dict evaluates as false
                   )
             sys.exit(1)
 
-    elif args.show_config is not None:
-        config_name = args.show_config
+    elif args.show_subvolume is not None:
+        config_name = args.show_subvolume
 
         if config_name in main_config['configs']:
             print(toml.dumps(main_config['configs'][config_name]))
@@ -377,8 +379,8 @@ if main_config:  # empty dict evaluates as false
                   )
             sys.exit(1)
 
-    elif args.edit_config is not None:
-        config_name = args.edit_config
+    elif args.edit_subvolume is not None:
+        config_name = args.edit_subvolume
 
         if config_name in main_config['configs']:
             print(toml.dumps(main_config['configs'][config_name]))
