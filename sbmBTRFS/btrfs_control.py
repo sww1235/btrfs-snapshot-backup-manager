@@ -62,18 +62,17 @@ class Subvolume:
         """
         return self.name < other.name
 
-    def exists(self):
-        """Check if subvolume object corresponds to an actual subvolume.
+    @classmethod
+    def exists(cls, path):
+        """Check if path corresponds to a subvolume on disk.
 
         Uses btrfs subvolume show command to detect if a subvolume exists.
-        This will work on snapshots as well.
         """
-        # TODO: check if .shapshots subvolume exists as well.
         if TESTING:
             return True
         else:
             return_val = subprocess.run(
-                ["btrfs", "subvolume", "show", self.path],
+                ["btrfs", "subvolume", "show", path],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.PIPE)
             if return_val.returncode != 0:
@@ -82,21 +81,23 @@ class Subvolume:
             else:
                 return True
 
-    def create(self):
+    @classmethod
+    def create(cls, path):
         """Create a btrfs subvolume at path.
 
         Uses btrfs-progs subvolume command to create a new subvolume
+        only used to create .snapshots subvolume if it doesn't exist
         """
         if TESTING:
-            print(f"btrfs subvolume create {self.path}")
+            print(f"btrfs subvolume create {path}")
         else:
-            subprocess.run(["btrfs", "subvolume", "create", self.path],
+            subprocess.run(["btrfs", "subvolume", "create", path],
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
             logging.info(return_val.stdout)
             logging.error(return_val.stderr)
-        logging.info(f"Creating new subvolume at {self.path}")
-        subvolume_name = os.path.basename(os.path.normpath(self.path))
+        logging.info(f"Creating new subvolume at {path}")
+        subvolume_name = os.path.basename(os.path.normpath(path))
         return cls(self.path, subvolume_name)
 
     def delete(self):
@@ -264,6 +265,24 @@ class Snapshot(Subvolume):
         This is defined as being created earlier than the other
         """
         return self.creation_date_time < other.creation_date_time
+
+    def exists(self):
+        """Check if snapshot object corresponds to a subvolume on disk.
+
+        Uses btrfs subvolume show command to detect if a subvolume exists.
+        """
+        if TESTING:
+            return True
+        else:
+            return_val = subprocess.run(
+                ["btrfs", "subvolume", "show", self.path],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE)
+            if return_val.returncode != 0:
+                logging.error(return_val.stderr)
+                return False
+            else:
+                return True
 
     def btrfs_take_snapshot(self, dest, ro):
         """Don't want snapshots of snapshots."""
