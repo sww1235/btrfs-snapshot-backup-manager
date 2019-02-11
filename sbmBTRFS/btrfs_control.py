@@ -226,10 +226,11 @@ class Subvolume:
 class Snapshot(Subvolume):
     """Represents a btrfs snapshot, which is a special case of subvolume."""
 
-    def __init__(self, name, snapshot_type, creation_date_time, subvolume,
-                 read_only):
+    def __init__(self, name, path, snapshot_type, creation_date_time,
+                 subvolume, read_only):
         """Initialize Snapshot class."""
         self.name = name
+        self.path = path
         self.snapshot_type = snapshot_type
         self.creation_date_time = creation_date_time
         self.read_only = read_only
