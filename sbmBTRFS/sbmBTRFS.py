@@ -72,7 +72,7 @@ def b2_send_file(filepath, subvolume):
     pass
 
 
-def read_config_file(path, type):
+def read_config_file(path, type_):
     """Read TOML formatted config file safely.
 
     Checks to make sure file exists before reading. Handles errors if it
@@ -88,14 +88,14 @@ def read_config_file(path, type):
         try:
             f = open(path, 'r')  # force read only mode
         except IOError:
-            logging.error(f"{type} config file was unable to be read: {path}!")
+            logging.error(f"{type_} config file was unable to be read: {path}!")
             return {}
         return toml.load(f)
     else:
-        if type != "default":
-            logging.critical(f"{type} config file did not exist at {path}!")
+        if type_ != "default":
+            logging.critical(f"{type_} config file did not exist at {path}!")
         else:
-            logging.critical(f"{type} config file did not exist at {path}! "
+            logging.critical(f"{type_} config file did not exist at {path}! "
                              f"Using backup values in script"
                              )
         return {}
