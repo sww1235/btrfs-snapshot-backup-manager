@@ -183,11 +183,11 @@ args = parser.parse_args()
 
 if TESTING:
     main_config_file_path = "../test/btrfs-sbm.toml"
-    default_config_file_path = "../test/btrfs-sbm-default.toml"
+    default_options_file_path = "../test/btrfs-sbm-default.toml"
 else:
     main_config_file_path = os.path.join(args.sysconfig_dir, "btrfs-sbm.toml")
-    default_config_file_path = os.path.join(args.sysconfig_dir,
-                                            "btrfs-sbm-default.toml")
+    default_options_file_path = os.path.join(args.sysconfig_dir,
+                                             "btrfs-sbm-default.toml")
 
 if TESTING:
     log_Path = "../test/testlog.log"
@@ -202,25 +202,25 @@ if not isinstance(numeric_log_level, int):
 logging.basicConfig(filename=log_Path, level=numeric_log_level)
 logging.info("logging started")
 
-main_config = {}
-default_config = {}
+main_configuration = {}
+default_options = {}
 
-main_config = read_config_file(main_config_file_path, "main")
+main_configuration = read_config_file(main_config_file_path, "main")
 
-if not main_config:  # empty dict evaluates as false
-    logging.warning(f"main config file not found at {main_config_file_path}. "
-                    f"No configs present.  Please run script with "
-                    f"--create-config option to create a config. This will "
-                    f"create a non empty config file."
+if not main_configuration:  # empty dict evaluates as false
+    logging.warning(f"main configuration file not found at "
+                    f"{main_config_file_path}. No subvolumes configured. "
+                    f"Please run script with --create-config option to create "
+                    f"a config. This will create a non empty config file."
                     )
 
-default_config = read_config_file(default_config_file_path, "default")
+default_options = read_config_file(default_options_file_path, "default")
 
-if not default_config:  # empty dict evaluates as false
-    logging.error(f"default config file not found at "
-                  f"{default_config_file_path}. Using defaults in script"
+if not default_options:  # empty dict evaluates as false
+    logging.error(f"default configuration file not found at "
+                  f"{default_options_file_path}. Using defaults in script"
                   )
-    default_config = {
+    default_options = {
         'keep-hourly': 10,
         'keep-daily': 10,
         'keep-weekly': 0,
@@ -228,7 +228,7 @@ if not default_config:  # empty dict evaluates as false
         'keep-yearly': 10
     }
 
-if main_config:  # empty dict evaluates as false
+if main_configuration:  # empty dict evaluates as false
 
     subvolumes = []
 
