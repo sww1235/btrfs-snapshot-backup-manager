@@ -1,18 +1,20 @@
 # main config file
 
 # table of tables
-[configs]
+[subvolume]
+path = "/path/to/subvolume"
 
-# default config table of a single subvolume config
-[configs.default]
-
-name = ""
-path = ""
-keep-hourly = 10
+# default config for a single subvolume
+keep-hourly = 5
 keep-daily = 10
 keep-weekly = 0
 keep-monthly = 10
 keep-yearly = 10
+
+[subvolume.snapshots."subvolume-2019-01-27T23:04:35.418948"]
+path = "/path/to/subvolume/.snapshots/subvolume-2019-01-27T23:04:35.418948"
+creation-date-time = "2019-01-27T23:04:35.418948"
+type = "init"
 
 # [configs.default.snapshots.snapshot]
 # list of snapshots
