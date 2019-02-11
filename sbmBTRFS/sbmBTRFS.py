@@ -230,6 +230,26 @@ if not default_config:  # empty dict evaluates as false
 
 if main_config:  # empty dict evaluates as false
 
+    subvolumes = []
+
+    # creating subvolume and snapshot objects
+    # for string, dict
+    for subvolume, contents in main_config.items():
+        sub_name = subvolume
+        sub_path = contents['path']
+        temp_sub = btrfs.Subvolume(sub_name, sub_path)
+        for snapshot, data in contents['snapshots'].items():
+            path = data['path']
+            creation_date_time = data['creation-date-time']
+            type_ = data['type']
+            temp_snapshot = btrfs.Snapshot(snapshot, path, type_,
+                                           creation_date_time, self, True
+                                           )
+            temp_sub.append_snapshot(temp_snapshot)
+        temp_sub.sort()  # make sure all snapshots are ordered by creation date
+        subvolumes.append(temp_sub)
+    subvolumes.sort()  # alphabetize subvolume objects in list
+
     # main command select
     if args.list_configs:
         """Lists subvolume configurations"""
