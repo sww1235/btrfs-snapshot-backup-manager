@@ -248,18 +248,18 @@ if main_configuration:  # empty dict evaluates as false
             temp_sub.append_snapshot(temp_snapshot)
         temp_sub.sort()  # make sure all snapshots are ordered by creation date
         subvolumes.append(temp_sub)
+
     subvolumes.sort()  # alphabetize subvolume objects in list
 
     # main command select
     if args.list_subvolumes:
-        """Lists subvolume configurations"""
+        """Lists known subvolumes"""
         fmt_string = "{name:<10}|{path:<20}"
-        print(fmt_string.format(name="Config", path="Subvolume Path"))
+        print(fmt_string.format(name="Subvolume", path="Path"))
         print(
             fmt_string.format(name="----------", path="--------------------"))
-        for key, subvol in main_config['configs'].items(
-        ):  # subvol is dict representing individual config
-            print(fmt_string.format(name=subvol['name'], path=subvol['path']))
+        for subvol in subvolumes:
+            print(fmt_string.format(name=subvol.name, path=subvol.path))
 
     elif args.init_subvolume is not None:
         """Initializes subvolume backups"""
