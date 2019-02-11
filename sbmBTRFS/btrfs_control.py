@@ -63,6 +63,7 @@ class Subvolume:
         Uses btrfs subvolume show command to detect if a subvolume exists.
         This will work on snapshots as well.
         """
+        # TODO: check if .shapshots subvolume exists as well.
         if TESTING:
             return True
         else:
@@ -133,6 +134,7 @@ class Subvolume:
         # This won't affect backup stuff, since the btrfs incremental send
         # will be between the previously saved snapshot, which is the one
         # before deleted snapshot
+        # TODO: append snapshot to list of snapshots in subvol
         if self.physical:
             time_now = datetime.now()
             snapshot_name = self.name + "-" + time_now.isoformat()
