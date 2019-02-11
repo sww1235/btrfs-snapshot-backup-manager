@@ -10,6 +10,7 @@ TESTING = True
 
 
 # TODO: Need to capture errors from btrfs commands as exceptions
+@total_ordering
 class Subvolume:
     """Represents a btrfs subvolume."""
 
@@ -44,14 +45,17 @@ class Subvolume:
 
     def __eq__(self, other):
         """Check if Subvolumes are equal."""
-        return self.path == other.path and self.name == other.name
+        return (self.path == other.path
+                and self.name == other.name
+                and self.physical == other.physical
+                )
 
     def __lt__(self, other):
         """Check if Subvolumes are less than another subvolume.
 
-        Not implemented.
+        Sorts based on name.
         """
-        return NotImplemented
+        return self.name < other.name
 
     def exists(self):
         """Check if subvolume object corresponds to an actual subvolume.
