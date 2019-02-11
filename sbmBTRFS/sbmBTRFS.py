@@ -182,15 +182,15 @@ parser.add_argument(
 args = parser.parse_args()
 
 if TESTING:
-    main_config_file_path = "./btrfs-sbm.toml"
-    default_config_file_path = "./btrfs-sbm-default.toml"
+    main_config_file_path = "../test/btrfs-sbm.toml"
+    default_config_file_path = "../test/btrfs-sbm-default.toml"
 else:
     main_config_file_path = os.path.join(args.sysconfig_dir, "btrfs-sbm.toml")
     default_config_file_path = os.path.join(args.sysconfig_dir,
                                             "btrfs-sbm-default.toml")
 
 if TESTING:
-    log_Path = "./testlog.log"
+    log_Path = "../test/testlog.log"
 else:
     log_Path = os.path.join("/", "var", "log", "btrfs-sbm.log")
 
