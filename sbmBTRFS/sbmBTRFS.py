@@ -12,6 +12,8 @@ from datetime import datetime, timedelta
 
 import toml
 
+import btrfs_control as btrfs
+
 # TODO: refactor code with classes for snapshots and subvolumes.
 # TODO: when list of snapshots is read from config file, use exists() to verify
 # they exist on disk.
