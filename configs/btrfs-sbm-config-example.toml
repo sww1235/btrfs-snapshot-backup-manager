@@ -15,10 +15,3 @@ keep-yearly = 10
 path = "/path/to/subvolume/.snapshots/subvolume-2019-01-27T23:04:35.418948"
 creation-date-time = "2019-01-27T23:04:35.418948"
 type = "init"
-
-# [configs.default.snapshots.snapshot]
-# list of snapshots
-# name = ""
-# type = "" # daily or hourly
-# path = ""
-# creation_date_time = "" # iso format
