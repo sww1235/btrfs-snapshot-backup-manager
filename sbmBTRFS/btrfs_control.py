@@ -157,7 +157,7 @@ class Subvolume:
                 # log stdout and stderr from btrfs commands
                 logging.info(return_val.stdout)
                 logging.error(return_val.stderr)
-        return Snapshot(snapshot_name, type_, time_now, self, ro)
+            return Snapshot(snapshot_name, type_, time_now, self, ro)
         else:
             logging.error(f"subvolume {self.name} does not exist on disk.")
             return None
