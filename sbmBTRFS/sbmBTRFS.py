@@ -87,7 +87,9 @@ def read_config_file(path, type_):
         try:
             f = open(path, 'r')  # force read only mode
         except IOError:
-            logging.error(f"{type_} config file was unable to be read: {path}!")
+            logging.error(f"{type_} config file was unable to be "
+                          f"read at {path}!"
+                          )
             return {}
         return toml.load(f)
     else:
