@@ -3,6 +3,7 @@
 # table of tables
 [subvolume]
 path = "/path/to/subvolume"
+snapshots-subvol = ".snapshots"
 
 # default config for a single subvolume
 keep-hourly = 5
