@@ -209,8 +209,9 @@ main_configuration = read_config_file(main_config_file_path, "main")
 if not main_configuration:  # empty dict evaluates as false
     logging.warning(f"main configuration file not found at "
                     f"{main_config_file_path}. No subvolumes configured. "
-                    f"Please run script with --create-config option to create "
-                    f"a config. This will create a non empty config file."
+                    f"Please run script with --init-subvolume option to "
+                    f"initialize subvolume. This will create a non empty "
+                    f"config file."
                     )
 
 default_options = read_config_file(default_options_file_path, "default")
