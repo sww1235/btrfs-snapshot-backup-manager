@@ -190,48 +190,6 @@ class Subvolume:
         """Sort snapshots in Subvolume."""
         self._snapshots.sort()
 
-    def send_snapshot_diff(self, new=None):
-        """Output diff between two subvolumes (snapshots) to a file.
-
-        Keyword arguments:
-        new -- snapshot object. (optional)
-        """
-        # TODO: Should this verify if new snapshot is actually newer?
-        tmp_path = os.path.join("/", "tmp")
-        # both snapshots exist on disk
-        if new and new.physical and self.physical:
-            diff_filename = (self.name + "::" + new.name)
-            diff_filepath = os.path.join(tmp_path, diff_filename)
-            if testing:
-                print(f"btrfs send -p {self.path} -f {diff_filepath} "
-                      f"{new.path}"
-                      )
-            else:
-                subprocess.run(["btrfs", "send", "-p", self.path, "-f",
-                                diff_filepath, new.path],
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
-                logging.info(return_val.stdout)
-                logging.error(return_val.stderr)
-            logging.info(f"Sending difference between {self.name} and "
-                         f"{new.name} to {diff_filepath}"
-                         )
-        elif self.physical:
-            diff_filename = "init" + "::" + self.name
-            diff_filepath = os.path.join(tmp_path, diff_filename)
-            if testing:
-                print(f"btrfs send -f {diff_filepath} {self.path}")
-            else:
-                subprocess.run(["btrfs", "send", "-f", diff_filepath,
-                               self.path],
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
-                logging.info(return_val.stdout)
-                logging.error(return_val.stderr)
-            logging.info(f"Sending {self.name} to {diff_filepath}")
-
-        return filepath  # return path of snapshot diff
-
 
 @total_ordering  # add extra comparison operators
 class Snapshot(Subvolume):
@@ -309,3 +267,45 @@ class Snapshot(Subvolume):
         """
         # TODO: utilize btrfs-snapshot-diff to do this once it is refactored.
         pass
+
+    def export_snapshot_diff(self, new=None):
+        """Output diff between two snapshots (subvolumes) to a file.
+
+        Keyword arguments:
+        new -- snapshot object. (optional)
+        """
+        # TODO: Should this verify if new snapshot is actually newer?
+        tmp_path = os.path.join("/", "tmp")
+        # both snapshots exist on disk
+        if new and new.physical and self.physical:
+            diff_filename = (self.name + "::" + new.name)
+            diff_filepath = os.path.join(tmp_path, diff_filename)
+            if testing:
+                print(f"btrfs send -p {self.path} -f {diff_filepath} "
+                      f"{new.path}"
+                      )
+            else:
+                subprocess.run(["btrfs", "send", "-p", self.path, "-f",
+                                diff_filepath, new.path],
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
+                logging.info(return_val.stdout)
+                logging.error(return_val.stderr)
+            logging.info(f"Sending difference between {self.name} and "
+                         f"{new.name} to {diff_filepath}"
+                         )
+        elif self.physical:
+            diff_filename = "init" + "::" + self.name
+            diff_filepath = os.path.join(tmp_path, diff_filename)
+            if testing:
+                print(f"btrfs send -f {diff_filepath} {self.path}")
+            else:
+                subprocess.run(["btrfs", "send", "-f", diff_filepath,
+                               self.path],
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
+                logging.info(return_val.stdout)
+                logging.error(return_val.stderr)
+            logging.info(f"Sending {self.name} to {diff_filepath}")
+
+        return filepath  # return path of snapshot diff
