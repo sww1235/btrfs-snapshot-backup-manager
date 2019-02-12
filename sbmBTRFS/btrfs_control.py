@@ -128,7 +128,7 @@ class Subvolume:
                           f"Did not exist on disk"
                           )
 
-    def btrfs_take_snapshot(self, dest, type_, ro):
+    def take_snapshot(self, dest, type_, ro):
         """Take a snapshot of a btrfs subvolume.
 
         Uses btrfs-progs snapshot command to take a snapshot of the src
@@ -190,7 +190,7 @@ class Subvolume:
         """Sort snapshots in Subvolume."""
         self._snapshots.sort()
 
-    def btrfs_send_snapshot_diff(self, new=None):
+    def send_snapshot_diff(self, new=None):
         """Output diff between two subvolumes (snapshots) to a file.
 
         Keyword arguments:
