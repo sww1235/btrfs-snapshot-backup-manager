@@ -128,7 +128,7 @@ class Subvolume:
                           f"Did not exist on disk"
                           )
 
-    def take_snapshot(self, dest, type_, ro):
+    def take_snapshot(self, type_, ro):
         """Take a snapshot of a btrfs subvolume.
 
         Uses btrfs-progs snapshot command to take a snapshot of the src
@@ -145,39 +145,53 @@ class Subvolume:
         # This won't affect backup stuff, since the btrfs incremental send
         # will be between the previously saved snapshot, which is the one
         # before deleted snapshot
-        # TODO: append snapshot to list of snapshots in subvol
         if self.physical:
             time_now = datetime.now()
-            snapshot_name = self.name + "-" + time_now.isoformat()
+            snapshot_name = self.name + "-" + str(time_now.isoformat())
+            snapshot_path = os.path.join(self.path, self.snapshot_subvol,
+                                         snapshot_name
+                                         )
             if ro:
                 if TESTING:
-                    print(f"btrfs subvolume snapshot -r {self.path} {dest}")
+                    print(f"btrfs subvolume snapshot "
+                          f"-r {self.path} {snapshot_path}"
+                          )
                 else:
                     return_val = subprocess.run(
                         ["btrfs", "subvolume", "snapshot", "-r",
-                            self.path, dest],
+                            self.path, snapshot_path],
                         stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE)
                 logging.info(f"Taking new read only snapshot of "
-                             f"{self.path} at {dest}"
+                             f"{self.path} at {snapshot_path}"
                              )
             else:
                 if TESTING:
-                    print(f"btrfs subvolume snapshot {self.path} {dest}")
+                    print(f"btrfs subvolume snapshot "
+                          f"{self.path} {snapshot_path}"
+                          )
                 else:
                     return_val = subprocess.run(
-                        ["btrfs", "subvolume", "snapshot", self.path, dest],
+                        ["btrfs", "subvolume", "snapshot", self.path,
+                            snapshot_path],
                         stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE)
-                logging.info(f"Taking new snapshot of {self.path} at {dest}")
+                logging.info(f"Taking new snapshot of {self.path} "
+                             f"at {snapshot_path}"
+                             )
             if not TESTING:
                 # log stdout and stderr from btrfs commands
                 logging.info(return_val.stdout)
                 logging.error(return_val.stderr)
-            return Snapshot(snapshot_name, type_, time_now, self, ro)
+            temp_snapshot = Snapshot(snapshot_name, snapshot_path, type_,
+                                     time_now, self, ro
+                                     )
+            self._snapshots.append(temp_snapshot)
+            return temp_snapshot
         else:
-            logging.error(f"subvolume {self.name} does not exist on disk.")
-            return None
+            logging.error(f"subvolume {self.name} does not exist on disk. "
+                          f"Cannot take snapshot!"
+                          )
 
     def append_snapshot(self, snaphot):
         """Append precreated snapshot object to list of snapshots.
