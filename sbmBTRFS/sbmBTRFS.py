@@ -237,7 +237,16 @@ if main_configuration:  # empty dict evaluates as false
     for subvolume, contents in main_config.items():
         sub_name = subvolume
         sub_path = contents['path']
-        temp_sub = btrfs.Subvolume(sub_name, sub_path)
+        snapshots_subvol = contents['snapshots-subvol']
+        keep_hourly = contents['keep-hourly']
+        keep_daily = contents['keep-daily']
+        keep_weekly = contents['keep-weekly']
+        keep_monthly = contents['keep-monthly']
+        keep_yearly = contents['keep-yearly']
+        temp_sub = btrfs.Subvolume(sub_name, sub_path, keep_hourly,
+                                   keep_daily, keep_weekly, keep_monthly,
+                                   keep_yearly
+                                   )
         for snapshot, data in contents['snapshots'].items():
             path = data['path']
             creation_date_time = data['creation-date-time']
