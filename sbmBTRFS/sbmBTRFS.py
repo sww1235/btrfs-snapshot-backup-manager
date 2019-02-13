@@ -177,7 +177,7 @@ action_group.add_argument(  # list all snapshots
 action_group.add_argument(  # delete snapshot
     '--delete-snapshot',
     action='store',
-    metavar="snapshot-name",
+    metavar="subvolume-name",
     help="deletes snapshot from subvolume. Snapshot is selected from list"
 )
 parser.add_argument(  # sysconfig dir
