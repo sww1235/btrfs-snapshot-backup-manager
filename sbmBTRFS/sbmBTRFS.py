@@ -349,32 +349,45 @@ if main_configuration:  # empty dict evaluates as false
     elif args.delete_subvolume is not None:
         subvolume_name = args.delete_subvolume
 
-        if config_name in main_config['configs']:
+        # this is a conditional expression and list comprehension.
+        # returns a subset of the subvolumes list that only has elements where
+        # subvol.name == subvolume_name
+        # In theory, since subvolume names should be unique, this will result
+        # in a 1 element list.
+        temp_sub_list = (subvol if subvol.name == subvolume_name else None for
+                         subvol in subvolumes)
+        if len(temp_sub_list) > 1:
+            logging.critical(f"Subvolumes with duplicate names detected, this "
+                             f"should not happen. Check config file for "
+                             f"Multiple instances of {subvolume_name}"
+                             )
+        temp_sub = temp_sub_list[0]  # get only element of list
+        if temp_sub:  # None == False
             if args.delete_snapshots:  # also delete snapshots
-                for snapshots, snapshot in main_config['configs'][config_name][
-                        'snapshots'].items():
-                    if btrfs_subvolume_exists(snapshot['path']):
-                        btrfs_delete_subvolume(snapshot['path'])
+                for snapshot in temp_sub:
+                    if snapshot.physical:
+                        temp_sub.delete_snapshot(snapshot)  # instance method
                     else:
-                        logging.warning(f"Snapshot: {snapshot['name']} did "
-                                        f"not exist at {snapshot['path']}."
+                        logging.warning(f"Snapshot: {snapshot.name} did "
+                                        f"not exist at {snapshot.path}."
                                         f"Ignoring"
                                         )
                 # delete snapshot directory last
-                snapshot_subvol_path = os.path.join(
-                    main_config['configs'][config]['path'],
-                    snapshot_subvol_name)
-                if btrfs_subvolume_exists(snapshot_subvol_path):
-                    btrfs_delete_subvolume(snapshot_subvol_path)
+                snapshot_subvol_path = os.path.join(temp_sub.path,
+                                                    temp_sub.snapshots_subvol
+                                                    )
+                if temp_sub.exists(snapshot_subvol_path):  # class method
+                    temp_sub.delete(snapshot_subvol_path)  # class method
                 else:
                     logging.warning(f"{snapshot_subvol_name} subvolume did "
                                     f"not exist. This is odd"
                                     )
-            del main_config['configs'][config_name]  # remove dictionary
+            # finally, remove subvolume object from list of subvolumes
+            subvolumes.remove(temp_sub)
         else:
-            print(f"{config_name} did not exist in the list of configs. Make "
-                  f"sure you typed it correctly or use --list-configs to view "
-                  f"available configs"
+            print(f"{subvolume_name} did not exist in the list of subvolumes. "
+                  f"Make sure you typed it correctly or use --list-subvolumes "
+                  f"to view configured subvolumes"
                   )
             sys.exit(1)
 
