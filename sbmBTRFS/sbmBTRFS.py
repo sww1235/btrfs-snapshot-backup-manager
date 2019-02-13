@@ -273,76 +273,66 @@ if main_configuration:  # empty dict evaluates as false
     elif args.init_subvolume is not None:
         """Initializes subvolume backups"""
         subvolume_path = args.init_subvolume
-        if btrfs_subvolume_exists(subvolume_path):
+        subvolume_name = os.path.basename(os.path.normpath(subvolume_path))
 
-            time_now = datetime.now()
-            subvolume_name = os.path.basename(os.path.normpath(subvolume_path))
+        for config, value in default_options.items():
+            # print(config, value)
+            try:
+                tmp = input(f"How many {config.split('-')[1]} "
+                            f"snapshots to keep? (Default={value}): ")
+            except SyntaxError:  # empty input
+                tmp = ""
 
-            snapshot_name = subvolume_name + "-" + time_now.isoformat()
+            if config == "keep-hourly":
+                if tmp != "":
+                    keep_hourly = int(tmp)
+                else:
+                    keep_hourly = int(value)
+            elif config == "keep-daily":
+                if tmp != "":
+                    keep_daily = int(tmp)
+                else:
+                    keep_daily = int(value)
+            elif config == "keep-weekly":
+                if tmp != "":
+                    keep_weekly = int(tmp)
+                else:
+                    keep_weekly = int(value)
+            elif config == "keep-monthly":
+                if tmp != "":
+                    keep_monthly = int(tmp)
+                else:
+                    keep_monthly = int(value)
+            elif config == "keep-yearly":
+                if tmp != "":
+                    keep_yearly = int(tmp)
+                else:
+                    keep_yearly = int(value)
 
-            snapshot_subvol_path = os.path.join(subvolume_path,
-                                                snapshot_subvol_name)
+        temp_sub = btrfs.Subvolume(sub_name, sub_path, snapshot_subvol_name,
+                                   keep_hourly, keep_daily, keep_weekly,
+                                   keep_monthly, keep_yearly
+                                   )
 
-            # add subvolume to config table
-            if subvolume_name not in main_config['configs']:
-                main_config['configs'][subvolume_name] = {}  # init dicts
-                main_config['configs'][subvolume_name]['options'] = {}
-                main_config['configs'][subvolume_name]['snapshots'] = {}
-                main_config['configs'][subvolume_name]['snapshots'][
-                    snapshot_name] = {}
-
-                main_config['configs'][subvolume_name]['name'] = subvolume_name
-                main_config['configs'][subvolume_name]['path'] = subvolume_path
-
-                for config, value in default_config.items():
-                    # print(config, value)
-                    try:
-                        tmp = input(f"How many {config.split('-')[1]} "
-                                    f"snapshots to keep? (Default={value}): ")
-                    except SyntaxError:
-                        tmp = ""
-                    if tmp != "":
-                        main_config['configs'][subvolume_name]['options'][
-                            config] = int(tmp)
-                    else:
-                        main_config['configs'][subvolume_name]['options'][
-                            config] = int(value)
-
-                # create .snapshots subvolume
-                if not btrfs_subvolume_exists(snapshot_subvol_path):
-                    btrfs_create_subvolume(snapshot_subvol_path)
-
-                # create first snapshot
-                btrfs_take_snapshot(
-                    subvolume_path,
-                    os.path.join(snapshot_subvol_path, snapshot_name), True)
-
-                main_config['configs'][subvolume_name]['snapshots'][
-                    snapshot_name]['name'] = snapshot_name
-                main_config['configs'][subvolume_name]['snapshots'][
-                    snapshot_name]['path'] = os.path.join(
-                        subvolume_path, snapshot_subvol_name, snapshot_name)
-                main_config['configs'][subvolume_name]['snapshots'][
-                    snapshot_name]['creation-date-time'] = str(
-                        time_now.isoformat())
-                main_config['configs'][subvolume_name]['snapshots'][
-                    snapshot_name]['type'] = "init"
-
-                # TODO: send intial snapshot to b2
-                # btrfs_send_snapshot_diff with no "new" path, then
-                # use returned path into b2 uploader tool to do excrytption,
-                # compression # and uploads
-            else:
-                print(f"subvolume config {subvolume_name} already exists. "
-                      f"Please use --show-config or --edit config instead"
-                      )
-                sys.exit(1)
+        if temp_sub in subvolumes:
+            print(f"subvolume {subvolume_name} is already configured. "
+                  f"Please use --show-config or --edit config instead"
+                  )
+            sys.exit(1)  # because this will only be used in interactive mode
+        elif temp_sub.physical:
+            # create first snapshot
+            init_snap = temp_sub.take_snapshot("init", True)
+            # init_diff_path = init_snap.send_snapshot_diff()
+            # TODO: send intial snapshot to b2
+            # btrfs_send_snapshot_diff with no "new" path, then
+            # use returned path into b2 uploader tool to do excrytption,
+            # compression # and uploads
 
         else:
-            print(f"{path} is not a btrfs subvolume. Make sure you typed it "
-                  f"correctly"
+            print(f"{subvolume_path} is not a btrfs subvolume. Please verify "
+                  f"you typed it correctly. Make sure to use"
                   )
-            sys.exit(1)
+            sys.exit(1)  # because this will only be used in interactive mode
 
     elif args.delete_subvolume is not None:
         config_name = args.delete_subvolume
