@@ -106,12 +106,10 @@ class Subvolume:
         return cls(self.path, subvolume_name)
 
     def delete(self):
-        """Delete a btrfs subvolume at path.
+        """Delete the btrfs subvolume it is called on.
 
         Uses btrfs-progs subvolume command to delete a subvolume. Cannot
         recursively delete subvolumes.
-        Keyword arguments:
-        path -- path to subvolume as string
         """
         if self.physical:
             if TESTING:
@@ -123,6 +121,7 @@ class Subvolume:
                 logging.info(return_val.stdout)
                 logging.error(return_val.stderr)
             logging.info(f"Deleting subvolume at {self.path}")
+
         else:
             logging.error(f"Could not delete subvolume at {self.path}."
                           f"Did not exist on disk"
@@ -219,6 +218,12 @@ class Snapshot(Subvolume):
         self.read_only = read_only
         self.subvolume = subvolume
         self._snapshots = None  # don't want snapshots of snapshots
+        # if the snapshot physically exists, otherwise mark as non physical
+        # and log
+        if self.exists(self.path):
+            self.physical = True
+        else:
+            self.physical = False
         super().__init__(self)  # add instance variables from superclass
 
     def __repr__(self):
@@ -260,6 +265,28 @@ class Snapshot(Subvolume):
                 return False
             else:
                 return True
+
+    def delete(self):
+        """Delete the btrfs snapshot it is called on.
+
+        Uses btrfs-progs subvolume command to delete a subvolume. Cannot
+        recursively delete subvolumes.
+        """
+        if self.physical:
+            if TESTING:
+                print(f"btrfs subvolume delete {self.path}")
+            else:
+                subprocess.run(["btrfs", "subvolume", "delete", self.path],
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
+                logging.info(return_val.stdout)
+                logging.error(return_val.stderr)
+            logging.info(f"Deleting snapshot at {self.path}")
+
+        else:
+            logging.error(f"Could not delete snapshot at {self.path}."
+                          f"Did not exist on disk"
+                          )
 
     def btrfs_take_snapshot(self, dest, ro):
         """Don't want snapshots of snapshots."""
