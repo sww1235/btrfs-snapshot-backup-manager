@@ -286,35 +286,35 @@ if main_configuration:  # empty dict evaluates as false
         subvolume_path = args.init_subvolume
         subvolume_name = os.path.basename(os.path.normpath(subvolume_path))
 
-        for config, value in default_options.items():
+        for option, value in default_options.items():
             # print(config, value)
             try:
-                tmp = input(f"How many {config.split('-')[1]} "
+                tmp = input(f"How many {option.split('-')[1]} "
                             f"snapshots to keep? (Default={value}): ")
             except SyntaxError:  # empty input
                 tmp = ""
 
-            if config == "keep-hourly":
+            if option == "keep-hourly":
                 if tmp != "":
                     keep_hourly = int(tmp)
                 else:
                     keep_hourly = int(value)
-            elif config == "keep-daily":
+            elif option == "keep-daily":
                 if tmp != "":
                     keep_daily = int(tmp)
                 else:
                     keep_daily = int(value)
-            elif config == "keep-weekly":
+            elif option == "keep-weekly":
                 if tmp != "":
                     keep_weekly = int(tmp)
                 else:
                     keep_weekly = int(value)
-            elif config == "keep-monthly":
+            elif option == "keep-monthly":
                 if tmp != "":
                     keep_monthly = int(tmp)
                 else:
                     keep_monthly = int(value)
-            elif config == "keep-yearly":
+            elif option == "keep-yearly":
                 if tmp != "":
                     keep_yearly = int(tmp)
                 else:
