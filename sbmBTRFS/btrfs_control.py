@@ -14,7 +14,7 @@ TESTING = True
 class Subvolume:
     """Represents a btrfs subvolume."""
 
-    def __init__(self, path, name, snapshots_subvol, hourly, daily,
+    def __init__(self, path, snapshots_subvol, hourly, daily,
                  weekly, monthly, yearly):
         """Initialize Subvolume class at path.
 
@@ -23,7 +23,7 @@ class Subvolume:
         This will be tested at creation time using the self.exists() method.
         """
         self.path = path
-        self.name = name
+        self.name = os.path.basename(os.path.normpath(path))
         self.snapshots_subvol = snapshots_subvol
         self.keep_hourly = hourly
         self.keep_daily = daily
