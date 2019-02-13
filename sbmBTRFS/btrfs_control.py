@@ -90,8 +90,8 @@ class Subvolume:
     def create(cls, path):
         """Create a btrfs subvolume at path.
 
-        Uses btrfs-progs subvolume command to create a new subvolume
-        only used to create .snapshots subvolume if it doesn't exist
+        Uses btrfs-progs subvolume command to create a new subvolume.
+        Only used to create .snapshots subvolume if it doesn't exist
         """
         if TESTING:
             print(f"btrfs subvolume create {path}")
@@ -105,25 +105,26 @@ class Subvolume:
         subvolume_name = os.path.basename(os.path.normpath(path))
         return cls(self.path, subvolume_name)
 
-    def delete(self):
-        """Delete the btrfs subvolume it is called on.
+    @classmethod
+    def delete(cls, path):
+        """Delete the btrfs subvolume at path.
 
         Uses btrfs-progs subvolume command to delete a subvolume. Cannot
-        recursively delete subvolumes.
+        recursively delete subvolumes. Only used to delete .snapshots subvolume
         """
         if self.physical:
             if TESTING:
-                print(f"btrfs subvolume delete {self.path}")
+                print(f"btrfs subvolume delete {path}")
             else:
-                subprocess.run(["btrfs", "subvolume", "delete", self.path],
+                subprocess.run(["btrfs", "subvolume", "delete", path],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
                 logging.info(return_val.stdout)
                 logging.error(return_val.stderr)
-            logging.info(f"Deleting subvolume at {self.path}")
+            logging.info(f"Deleting subvolume at {path}")
 
         else:
-            logging.error(f"Could not delete subvolume at {self.path}."
+            logging.error(f"Could not delete subvolume at {path}."
                           f"Did not exist on disk"
                           )
 
