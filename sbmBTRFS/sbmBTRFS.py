@@ -138,15 +138,15 @@ action_group.add_argument(  # delete subvolumes
     '--delete-subvolume',
     action='store',
     metavar="config-name",
-    help=("removes subvolume from list in main config file, does not"
+    help=("removes subvolume configuration from known list, does not "
           "delete associated snapshots"
           )
 )
-parser.add_argument(  # delete snapshot
+parser.add_argument(  # delete snapshots
     '--delete-snapshots',
     action='store_true',
     default=False,
-    help=("combine with --delete-subvolume to delete snapshot directory, does"
+    help=("combine with --delete-subvolume to delete snapshot directory, does "
           "nothing by itself"
           )
 )
@@ -160,7 +160,7 @@ action_group.add_argument(  # edit subvolume
     '--edit-subvolume',
     action='store',
     metavar="config-name",
-    help="prompts to change values configuration for specific subvolume"
+    help="prompts to change configuration values for specific subvolume"
 )
 action_group.add_argument(  # list snapshot
     '--list-snapshots',
