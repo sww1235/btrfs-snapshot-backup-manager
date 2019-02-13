@@ -259,7 +259,7 @@ if main_configuration:  # empty dict evaluates as false
         keep_weekly = contents['keep-weekly']
         keep_monthly = contents['keep-monthly']
         keep_yearly = contents['keep-yearly']
-        temp_sub = btrfs.Subvolume(sub_name, sub_path, keep_hourly,
+        temp_sub = btrfs.Subvolume(sub_path, keep_hourly,
                                    keep_daily, keep_weekly, keep_monthly,
                                    keep_yearly
                                    )
@@ -320,7 +320,7 @@ if main_configuration:  # empty dict evaluates as false
                 else:
                     keep_yearly = int(value)
 
-        temp_sub = btrfs.Subvolume(sub_name, sub_path, snapshot_subvol_name,
+        temp_sub = btrfs.Subvolume(sub_path, snapshot_subvol_name,
                                    keep_hourly, keep_daily, keep_weekly,
                                    keep_monthly, keep_yearly
                                    )
@@ -328,6 +328,7 @@ if main_configuration:  # empty dict evaluates as false
         if temp_sub in subvolumes:
             print(f"subvolume {subvolume_name} is already configured. "
                   f"Please use --show-config or --edit config instead"
+                  f"Subvolume names must be unique"
                   )
             sys.exit(1)  # because this will only be used in interactive mode
         elif temp_sub.physical:
