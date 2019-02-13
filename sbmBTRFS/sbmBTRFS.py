@@ -111,15 +111,14 @@ def list_subvolumes():
                           path="--------------------"
                           )
          )
-    for subvol in subvolumes:
-        i = 0
-        print(fmt_string.format(number=str(i), name=subvol.name,
+    for index, subvol in enumerate(subvolumes):
+        print(fmt_string.format(number=str(index), name=subvol.name,
                                 path=subvol.path
                                 )
               )
-        i += 1
 
 # first thing, read command line options
+
 
 parser = argparse.ArgumentParser()
 action_group = parser.add_mutually_exclusive_group()
@@ -347,7 +346,7 @@ if main_configuration:  # empty dict evaluates as false
             sys.exit(1)  # because this will only be used in interactive mode
 
     elif args.delete_subvolume is not None:
-        config_name = args.delete_subvolume
+        subvolume_name = args.delete_subvolume
 
         if config_name in main_config['configs']:
             if args.delete_snapshots:  # also delete snapshots
