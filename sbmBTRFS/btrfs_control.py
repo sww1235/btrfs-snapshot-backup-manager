@@ -192,6 +192,11 @@ class Subvolume:
                           f"Cannot take snapshot!"
                           )
 
+    def delete_snapshot(self, snapshot):
+        """Delete snapshot from subvolume list."""
+        snapshot.delete()
+        self._snapshots.remove(snapshot)
+
     def append_snapshot(self, snaphot):
         """Append precreated snapshot object to list of snapshots.
 
@@ -282,10 +287,9 @@ class Snapshot(Subvolume):
                 logging.info(return_val.stdout)
                 logging.error(return_val.stderr)
             logging.info(f"Deleting snapshot at {self.path}")
-
         else:
             logging.error(f"Could not delete snapshot at {self.path}."
-                          f"Did not exist on disk"
+                          f"Did not exist on disk."
                           )
 
     def btrfs_take_snapshot(self, dest, ro):
