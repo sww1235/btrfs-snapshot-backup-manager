@@ -134,7 +134,7 @@ action_group.add_argument(  # init subvolume
     metavar="/path/to/subvolume",
     help="Initializes subvolume with initial snapshot and configuration"
 )
-action_group.add_argument(  # delete subvolumes
+action_group.add_argument(  # delete subvolume
     '--delete-subvolume',
     action='store',
     metavar="config-name",
@@ -153,19 +153,19 @@ parser.add_argument(  # delete snapshots
 action_group.add_argument(  # show subvolume
     '--show-subvolume',
     action='store',
-    metavar="config-name",
+    metavar="snapshot-name",
     help="prints configuration for specific subvolume"
 )
 action_group.add_argument(  # edit subvolume
     '--edit-subvolume',
     action='store',
-    metavar="config-name",
+    metavar="snapshot-name",
     help="prompts to change configuration values for specific subvolume"
 )
 action_group.add_argument(  # list snapshot
     '--list-snapshots',
     action='store',
-    metavar="config-name",
+    metavar="snapshot-name",
     help="prints all snapshots of subvolume"
 )
 action_group.add_argument(  # list all snapshots
@@ -177,7 +177,7 @@ action_group.add_argument(  # list all snapshots
 action_group.add_argument(  # delete snapshot
     '--delete-snapshot',
     action='store',
-    metavar="config-name",
+    metavar="snapshot-name",
     help="deletes snapshot from subvolume. Snapshot is selected from list"
 )
 parser.add_argument(  # sysconfig dir
