@@ -265,7 +265,8 @@ if main_configuration:  # empty dict evaluates as false
                                    )
         for snapshot, data in contents['snapshots'].items():
             path = data['path']
-            creation_date_time = data['creation-date-time']
+            creation_date_time = datetime.fromisoformat(
+                                 data['creation-date-time'])
             type_ = data['type']
             temp_snapshot = btrfs.Snapshot(snapshot, path, type_,
                                            creation_date_time, self, True
