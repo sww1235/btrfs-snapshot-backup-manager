@@ -47,13 +47,13 @@ class Subvolume:
 
     def __str__(self):
         """Return useful string representation of class."""
-        print(f"Subvolume {self.name} at {self.path}")
-        print("It is configured to keep:")
-        print(f"{self.keep_hourly} hourly snapshots")
-        print(f"{self.keep_daily} daily snapshots")
-        print(f"{self.keep_weekly} weekly snapshots")
-        print(f"{self.keep_monthly} monthly snapshots")
-        print(f"{self.keep_yearly} yearly snapshots")
+        return f"Subvolume {self.name} at {self.path}\n"
+        f"It is configured to keep:\n"
+        f"{self.keep_hourly} hourly snapshots\n"
+        f"{self.keep_daily} daily snapshots\n"
+        f"{self.keep_weekly} weekly snapshots\n"
+        f"{self.keep_monthly} monthly snapshots\n"
+        f"{self.keep_yearly} yearly snapshots\n"
 
     def __len__(self):
         """Length Method for iterating Snapshots in Subvolume."""
