@@ -103,8 +103,8 @@ def read_config_file(path, type_):
 
 
 def list_subvolumes():
-    """List known subvolumes with numbers."""
-    fmt_string = "{number:<2}{name:<10}|{path:<20}"
+    """List known subvolumes with index."""
+    fmt_string = "{number:<2}|{name:<10}|{path:<20}"
     print(fmt_string.format(number="", name="Subvolume", path="Path"))
     print(
         fmt_string.format(number="--", name="----------",
