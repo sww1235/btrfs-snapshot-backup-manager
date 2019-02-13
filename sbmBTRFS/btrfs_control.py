@@ -230,6 +230,11 @@ class Subvolume:
                                     )
                   )
 
+    def newest_snapshot(self):
+        """Return newest snapshot known to subvolume."""
+        self.sort()  # make sure list of snapshots is sorted asending
+        return self._snapshots[-1]  # return last (newest) snapshot in list
+
     def sort(self):
         """Sort snapshots in Subvolume."""
         self._snapshots.sort()
