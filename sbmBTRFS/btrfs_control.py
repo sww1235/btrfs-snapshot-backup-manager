@@ -54,11 +54,11 @@ class Subvolume:
         return self._snapshots[position]
 
     def __eq__(self, other):
-        """Check if Subvolumes are equal."""
-        return (self.path == other.path
-                and self.name == other.name
-                and self.physical == other.physical
-                )
+        """Check if Subvolumes are equal.
+
+        Enforcing subvolume name has to be unique
+        """
+        return (self.name == other.name)
 
     def __lt__(self, other):
         """Check if Subvolumes are less than another subvolume.
