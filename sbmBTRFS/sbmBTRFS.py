@@ -102,6 +102,23 @@ def read_config_file(path, type_):
         return {}
 
 
+def list_subvolumes():
+    """List known subvolumes with numbers."""
+    fmt_string = "{number:<2}{name:<10}|{path:<20}"
+    print(fmt_string.format(number="", name="Subvolume", path="Path"))
+    print(
+        fmt_string.format(number="--", name="----------",
+                          path="--------------------"
+                          )
+         )
+    for subvol in subvolumes:
+        i = 0
+        print(fmt_string.format(number=str(i), name=subvol.name,
+                                path=subvol.path
+                                )
+              )
+        i += 1
+
 # first thing, read command line options
 
 parser = argparse.ArgumentParser()
@@ -263,12 +280,7 @@ if main_configuration:  # empty dict evaluates as false
     # main command select
     if args.list_subvolumes:
         """Lists known subvolumes"""
-        fmt_string = "{name:<10}|{path:<20}"
-        print(fmt_string.format(name="Subvolume", path="Path"))
-        print(
-            fmt_string.format(name="----------", path="--------------------"))
-        for subvol in subvolumes:
-            print(fmt_string.format(name=subvol.name, path=subvol.path))
+        list_subvolumes()
 
     elif args.init_subvolume is not None:
         """Initializes subvolume backups"""
