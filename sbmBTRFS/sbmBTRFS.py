@@ -392,29 +392,29 @@ if main_configuration:  # empty dict evaluates as false
             sys.exit(1)
 
     elif args.show_subvolume is not None:
-        config_name = args.show_subvolume
+        subvolume_name = args.show_subvolume
 
-        if config_name in main_config['configs']:
-            print(toml.dumps(main_config['configs'][config_name]))
+        temp_sub_list = (subvol if subvol.name == subvolume_name else None for
+                         subvol in subvolumes)
+        if len(temp_sub_list) > 1:
+            logging.critical(f"Subvolumes with duplicate names detected, this "
+                             f"should not happen. Check config file for "
+                             f"Multiple instances of {subvolume_name}"
+                             )
+        temp_sub = temp_sub_list[0]  # get only element of list
+
+        if temp_sub:
+            print(temp_sub)
         else:
-            print(f"{config_name} did not exist in the list of configs. Make "
-                  f"sure you typed it correctly or use --list-configs to view "
-                  f"available configs"
+            print(f"{subvolume_name} did not exist in the list of configs. "
+                  f"Make sure you typed it correctly or use --list-subvolumes "
+                  f"to view configured snapshots"
                   )
             sys.exit(1)
 
     elif args.edit_subvolume is not None:
-        config_name = args.edit_subvolume
-
-        if config_name in main_config['configs']:
-            print(toml.dumps(main_config['configs'][config_name]))
-            # TODO: look into python editor or implement subset myself
-        else:
-            print(f"{config_name} did not exist in the list of configs. Make "
-                  f"sure you typed it correctly or use --list-configs to view "
-                  f"available configs"
-                  )
-            sys.exit(1)
+        pass
+        # TODO: look into python editor or implement subset myself
 
     elif args.list_snapshots is not None:
         config_name = args.list_snapshots
