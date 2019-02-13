@@ -215,6 +215,21 @@ class Subvolume:
         """
         self._snapshots.append(snapshot)
 
+    def list_snapshots(self):
+        """List snapshots in Subvolume with index."""
+        fmt_string = "{number:<3}|{name:<10}|{path:<20}"
+        print(fmt_string.format(number="", name="Snapshot", path="Path"))
+        print(
+            fmt_string.format(number="---", name="----------",
+                              path="--------------------"
+                              )
+             )
+        for index, snapshot in enumerate(self._snapshots):
+            print(fmt_string.format(number=str(index), name=snapshot.name,
+                                    path=snapshot.path
+                                    )
+                  )
+
     def sort(self):
         """Sort snapshots in Subvolume."""
         self._snapshots.sort()
