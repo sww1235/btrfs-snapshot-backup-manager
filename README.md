@@ -60,8 +60,7 @@ multiple instances of script running
 
 ## Notes
 
-use `.snapshots` subvolume to store snapshots like snapper. ~~TODO: figure out
-snapshot naming scheme.~~
+use `.snapshots` subvolume to store snapshots like snapper.
 
 
 

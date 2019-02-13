@@ -535,7 +535,7 @@ if main_configuration:  # empty dict evaluates as false
                     subvolume['snapshots'][snapshot_name]['type'] = "yearly"
                 else:
                     subvolume['snapshots'][snapshot_name]['type'] = "hourly"
-                # # TODO: btrfs send diff between snapshots
+                # TODO: btrfs send diff between snapshots
                 # btrfs_send_snapshot_diff with no "new" path, then
                 # use returned path into b2 updloader tool to do excrytption,
                 # compression and uploads
