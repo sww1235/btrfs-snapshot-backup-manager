@@ -417,24 +417,74 @@ if main_configuration:  # empty dict evaluates as false
         # TODO: look into python editor or implement subset myself
 
     elif args.list_snapshots is not None:
-        config_name = args.list_snapshots
-        pass
-        # TODO: implement list_snapshots
-        # create custom pretty print function so it can be reused
-        # have option to print snapshot numbers or not
+        subvolume_name = args.list_snapshots
+        temp_sub_list = (subvol if subvol.name == subvolume_name else None for
+                         subvol in subvolumes)
+        if len(temp_sub_list) > 1:
+            logging.critical(f"Subvolumes with duplicate names detected, this "
+                             f"should not happen. Check config file for "
+                             f"Multiple instances of {subvolume_name}"
+                             )
+        temp_sub = temp_sub_list[0]  # get only element of list
+        temp_sub.list_snapshots()  # prints all snapshots in subvolume
 
     elif args.list_all_snapshots:
-        pass
-        # TODO: loop through all subvolumes and call list_snapshots
+        for subvolume in subvolumes:
+            print("Snapshots in ", subvolume)
+            subvolume.list_snapshots()
 
     elif args.delete_snapshot is not None:
-        config_name = args.delete_snapshot
-        # TODO:
-        # - print list of snapshots in config.
-        # use same mechanism as list_snapshots
-        # but print and keep track of snapshot numbers
-        # - prompt for snapshot number to delete
-        # - delete snapshot after confirmation printout and prompt
+        subvolume_name = args.delete_snapshot
+        temp_sub_list = (subvol if subvol.name == subvolume_name else None for
+                         subvol in subvolumes)
+        if len(temp_sub_list) > 1:
+            logging.critical(f"Subvolumes with duplicate names detected, this "
+                             f"should not happen. Check config file for "
+                             f"Multiple instances of {subvolume_name}"
+                             )
+        temp_sub = temp_sub_list[0]  # get only element of list
+        temp_sub.list_snapshots()  # prints all snapshots in subvolume
+
+        while True:
+            try:
+                tmp = input("Enter number of the snapshot you want "
+                            "to delete: ")
+            except SyntaxError:  # empty input
+                tmp = ""
+            if tmp == "":
+                print("Exiting!")
+                sys.exit(0)  # this is fine due to interactive command
+            else:
+                try:
+                    index = int(tmp)
+                except ValueError:
+                    print(f"The value you entered, {tmp}, was not an integer. "
+                          f"Please try again.")
+                    continue
+                if index < len(temp_sub):
+                    break
+                else:
+                    print("You entered a number that does not correspond to a "
+                          "known snapshot. Please try again.")
+                    continue
+
+        while True:
+            try:
+                answer = input(f"Is the following the snapshot you "
+                               f"selected for "
+                               f"deletion:\n{temp_sub[index]}\n"
+                               f"Please enter \"Y\" or \"N\".")
+            except SyntaxError:  # empty input
+                continue
+            if answer.upper() == "N":
+                print("Exiting!")
+                sys.exit(0)  # this is fine due to interactive command
+            elif answer.upper() == "Y":
+                break
+                temp_sub.delete_snapshot(temp_sub[index])
+            else:
+                print("You did not enter \"Y\" or \"N\". Please try again.")
+                continue
 
     else:  # automatic functionality
         time_now = datetime.now()
