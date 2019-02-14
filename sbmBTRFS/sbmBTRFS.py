@@ -491,51 +491,37 @@ if main_configuration:  # empty dict evaluates as false
         time_now = datetime.now()
 
         # loop through all subvolume configs except default
-        for key, subvolume in main_config['configs'].items():
+        for subvolume in subvolumes:
 
-            subvolume_name = subvolume['name']
-            subvolume_path = subvolume['path']
+            snapshot_name = subvolume.name + "-" + time_now.isoformat()
+            snapshot_subvol_path = os.path.join(subvolume.path,
+                                                subvolume.snapshots_subvol)
 
-            snapshot_name = subvolume_name + "-" + time_now.isoformat()
-            snapshot_subvol_path = os.path.join(subvolume_path,
-                                                snapshot_subvol_name)
-
-            newest_snapshot = max(
-                subvolume['snapshots'].items(),
-                key=lambda x: x[1]['creation-date-time'])[0]
-            newest_snapshot_time = datetime.fromisoformat(
-                subvolume['snapshots'][newest_snapshot]['creation-date-time'])
-            # delta between last snapshot and now is at least 1 hour
+            newest_snapshot = subvolume.newest_snapshot()
+            newest_snapshot_time = newest_snapshot.creation_date_time
+            # if delta between last snapshot and now is at least 1 hour
+            # take a new snapshot
             if time_now >= newest_snapshot_time + timedelta(hours=1):
-                subvolume['snapshots'][snapshot_name] = {}
                 # assuming subvol and .snapshot directory already exist
-                btrfs_take_snapshot(
-                    subvolume['path'],
-                    os.path.join(snapshot_subvol_path, snapshot_name), True)
-                subvolume['snapshots'][snapshot_name]['name'] = snapshot_name
-                subvolume['snapshots'][snapshot_name]['path'] = os.path.join(
-                    subvolume_path, snapshot_subvol_name, snapshot_name)
-                subvolume['snapshots'][snapshot_name][
-                    'creation-date-time'] = str(time_now.isoformat())
 
                 if time_now.hour == 0 and not newest_snapshot_time.hour == 0:
-                    subvolume['snapshots'][snapshot_name]['type'] = "daily"
+                    type_ = "daily"
                 # begining of week = monday
-                elif (
-                        time_now.isoweekday() == 1
-                        and not newest_snapshot_time.isoweekday() == 1):
-                    subvolume['snapshots'][snapshot_name]['type'] = "weekly"
+                elif (time_now.isoweekday() == 1
+                      and not newest_snapshot_time.isoweekday() == 1):
+                    type_ = "weekly"
                 # first day of month
                 elif time_now.day == 1 and not newest_snapshot_time.day == 1:
-                    subvolume['snapshots'][snapshot_name]['type'] = "monthly"
+                    type_ = "monthly"
                 # first day of year
-                elif (
-                        (time_now.month == 1 and time_now.day == 1) and not (
-                        newest_snapshot_time.month == 1 and
-                        newest_snapshot_time.day == 1)):
-                    subvolume['snapshots'][snapshot_name]['type'] = "yearly"
+                elif ((time_now.month == 1 and time_now.day == 1)
+                        and not (newest_snapshot_time.month == 1
+                                 and newest_snapshot_time.day == 1)):
+                    type_ = "yearly"
                 else:
-                    subvolume['snapshots'][snapshot_name]['type'] = "hourly"
+                    type_ = "hourly"
+
+                subvolume.take_snapshot(type_, True)  # read only snapshot
                 # TODO: btrfs send diff between snapshots
                 # btrfs_send_snapshot_diff with no "new" path, then
                 # use returned path into b2 updloader tool to do excrytption,
@@ -548,20 +534,18 @@ if main_configuration:  # empty dict evaluates as false
                 'yearly': 0
             }
             snapshots_by_type = {
-                'hourly': {},
-                'daily': {},
-                'weekly': {},
-                'monthly': {},
-                'yearly': {}
+                'hourly': [],
+                'daily': [],
+                'weekly': [],
+                'monthly': [],
+                'yearly': []
             }
 
             # count number of each type of snapshot
-            for snapshots, snapshot in subvolume['snapshots'].items():
-                snapshot_type = snapshot['type']
-                if snapshot_type != 'init':
-                    num_snapshots[snapshot_type] += 1
-                    snapshots_by_type[snapshot_type][
-                        snapshot['name']] = snapshot
+            for snapshot in subvolume:
+                if snapshot.type_ != 'init':
+                    num_snapshots[snapshot.type_] += 1
+                    snapshots_by_type[snapshot.type_].append(snapshot)
                 else:
                     pass
 
