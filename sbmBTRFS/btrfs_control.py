@@ -254,12 +254,12 @@ class Subvolume:
 class Snapshot(Subvolume):
     """Represents a btrfs snapshot, which is a special case of subvolume."""
 
-    def __init__(self, name, path, snapshot_type, creation_date_time,
+    def __init__(self, name, path, type_, creation_date_time,
                  subvolume, read_only):
         """Initialize Snapshot class."""
         self.name = name
         self.path = path
-        self.snapshot_type = snapshot_type
+        self.type_ = type_
         self.creation_date_time = creation_date_time
         self.read_only = read_only
         self.subvolume = subvolume
@@ -282,7 +282,7 @@ class Snapshot(Subvolume):
                 and self.name == other.name
                 and self.subvolume == other.subvolume
                 and self.creation_date_time == other.creation_date_time
-                and self.snapshot_type == other.snapshot_type
+                and self.type_ == other.type_
                 and self.read_only == other.read_only
                 )
         # TODO: this should probably use the btrfs_snapshot_diff_check method
