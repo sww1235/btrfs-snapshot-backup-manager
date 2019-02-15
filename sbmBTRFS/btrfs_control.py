@@ -25,11 +25,20 @@ class Subvolume:
         self.path = path
         self.name = os.path.basename(os.path.normpath(path))
         self.snapshots_subvol = snapshots_subvol
-        self.keep_hourly = hourly
-        self.keep_daily = daily
-        self.keep_weekly = weekly
-        self.keep_monthly = monthly
-        self.keep_yearly = yearly
+        self.num_snapshots = {
+            'hourly': 0,
+            'daily': 0,
+            'weekly': 0,
+            'monthly': 0,
+            'yearly': 0
+        }
+        self.keep_snapshots = {
+            'hourly': hourly,
+            'daily': daily,
+            'weekly': weekly,
+            'monthly': monthly,
+            'yearly': yearly
+        }
         # if the subvolume physically exists, otherwise mark as non physical
         # and log
         if self.exists(self.path):
@@ -47,13 +56,11 @@ class Subvolume:
 
     def __str__(self):
         """Return useful string representation of class."""
-        return f"Subvolume {self.name} at {self.path}\n"
-        f"It is configured to keep:\n"
-        f"{self.keep_hourly} hourly snapshots\n"
-        f"{self.keep_daily} daily snapshots\n"
-        f"{self.keep_weekly} weekly snapshots\n"
-        f"{self.keep_monthly} monthly snapshots\n"
-        f"{self.keep_yearly} yearly snapshots\n"
+        ret_str = f"Subvolume {self.name} at {self.path}\n"
+        ret_str += f"It is configured to keep:\n"
+        for name, value in self.keep_snapshots.items():
+            ret_str += f"{value} {name} snapshots\n"
+        return ret_str
 
     def __len__(self):
         """Length Method for iterating Snapshots in Subvolume."""
@@ -197,6 +204,7 @@ class Subvolume:
                                      time_now, self, ro
                                      )
             self._snapshots.append(temp_snapshot)
+            self.num_snapshots[type_] += 1
             return temp_snapshot
         else:
             logging.error(f"subvolume {self.name} does not exist on disk. "
@@ -205,6 +213,7 @@ class Subvolume:
 
     def delete_snapshot(self, snapshot):
         """Delete snapshot from subvolume list."""
+        self.num_snapshots[snapshot.type_] -= 1
         snapshot.delete()
         self._snapshots.remove(snapshot)
 
@@ -214,6 +223,7 @@ class Subvolume:
         currently only used when reading existing config file
         """
         self._snapshots.append(snapshot)
+        self.num_snapshots[snaphot.type_] += 1
 
     def list_snapshots(self):
         """List snapshots in Subvolume with index."""
