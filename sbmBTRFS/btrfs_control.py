@@ -10,6 +10,7 @@ TESTING = True
 
 
 # TODO: Need to capture errors from btrfs commands as exceptions
+# TODO: Change snapshot type into an enum
 @total_ordering
 class Subvolume:
     """Represents a btrfs subvolume."""
