@@ -144,7 +144,7 @@ class Subvolume:
                           f"Did not exist on disk"
                           )
 
-    def take_snapshot(self, type_, ro):
+    def take_snapshot(self, type_, ro=True):
         """Take a snapshot of a btrfs subvolume.
 
         Uses btrfs-progs snapshot command to take a snapshot of the src
