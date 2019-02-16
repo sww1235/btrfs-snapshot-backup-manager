@@ -593,7 +593,7 @@ if os.path.exists(main_config_file_path):
                          f"See exception {e}"
                          )
         sys.exit(1)
-    toml.dump(main_config, f)  # write config file
+    toml.dump(updated_config, f)  # write config file
 else:
     logging.warning(f"main config file did not exist. Creating now "
                     f"at {main_config_file_path}."
@@ -606,5 +606,6 @@ else:
                          f"{main_config_file_path}. See exception {e}"
                          )
         sys.exit(1)
+    toml.dump(updated_config, f)  # write config file
 
 logging.shutdown()
