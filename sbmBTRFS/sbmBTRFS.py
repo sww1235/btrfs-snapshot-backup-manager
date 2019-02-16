@@ -334,7 +334,7 @@ if main_configuration:  # empty dict evaluates as false
             sys.exit(1)  # because this will only be used in interactive mode
         elif temp_sub.physical:
             # create first snapshot
-            init_snap = temp_sub.take_snapshot("init", True)
+            init_snap = temp_sub.take_snapshot("init")
             # init_diff_path = init_snap.send_snapshot_diff()
             # TODO: send intial snapshot to b2
             # btrfs_send_snapshot_diff with no "new" path, then
@@ -521,61 +521,31 @@ if main_configuration:  # empty dict evaluates as false
                 else:
                     type_ = "hourly"
 
-                subvolume.take_snapshot(type_, True)  # read only snapshot
+                subvolume.take_snapshot(type_)  # read only snapshot
                 # TODO: btrfs send diff between snapshots
                 # btrfs_send_snapshot_diff with no "new" path, then
                 # use returned path into b2 updloader tool to do excrytption,
                 # compression and uploads
-            num_snapshots = {
-                'hourly': 0,
-                'daily': 0,
-                'weekly': 0,
-                'monthly': 0,
-                'yearly': 0
-            }
-            snapshots_by_type = {
-                'hourly': [],
-                'daily': [],
-                'weekly': [],
-                'monthly': [],
-                'yearly': []
-            }
 
-            # count number of each type of snapshot
-            for snapshot in subvolume:
-                if snapshot.type_ != 'init':
-                    num_snapshots[snapshot.type_] += 1
-                    snapshots_by_type[snapshot.type_].append(snapshot)
-                else:
-                    pass
-
-            print(num_snapshots)
+            print(subvolume.num_snapshots)
 
             # check if number of snapshots of each type are over limit, and
             # remove oldest
 
-            for type, value in num_snapshots.items():
-                if value > subvolume['options']["keep-" + type]:
-                    # list of snapshots
-                    # lambda k: k[1]['creation-date-time'] the [1] is
-                    # essentially selecting the value in the key value pair
-                    # that is x where key = snapshots dict, and value is
-                    # individual snapshot dict beneath it.
-                    newlist = sorted(
-                        snapshots_by_type[type].items(),
-                        key=lambda k: k[1]['creation-date-time'])
+            for type_, value in subvolume.num_snapshots.items():
+                if value > subvolume.keep_snapshots[type_]:
                     # delete oldest snapshots up to max
-                    for sel in range(value -
-                                     subvolume['options']["keep-" + type]):
-                        # newlist is list of tuples (snapshot name, snapshot
-                        # dict) due to .items()
-                        # need to select tuple within that, then select
-                        # snapshot dict inside tuple
-                        btrfs_delete_subvolume(newlist[sel][1]['path'])
-                        del subvolume['snapshots'][newlist[sel][0]]
-                else:
-                    pass
-                    # print("false")
+                    subvolume.sort()
+                    num_snapshots_over = (
+                                value
+                                - subvolume.keep_snapshots[type_]
+                                )
+                    # now snapshots are sorted oldest first
+                    while num_snapshots_over > 0:
+                        for snapshot in subvolume:
+                            if snapshot.type_ == type_:
+                                subvolume.delete_snapshot()
+                                num_snapshots_over -= 1
 
 
 else:
