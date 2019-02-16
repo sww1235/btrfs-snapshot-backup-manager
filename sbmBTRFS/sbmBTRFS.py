@@ -551,6 +551,33 @@ if main_configuration:  # empty dict evaluates as false
 else:
     pass  # continue on and save main config file
 
+# update main config file
+
+updated_config = {}
+
+for subv in subvolumes:
+    sub_dict = {}
+    sub_dict['name'] = subv.name
+    sub_dict['path'] = subv.path
+    sub_dict['snapshots-subvol'] = subv.snapshots_subvol
+    sub_dict['keep-hourly'] = subv.keep_hourly
+    sub_dict['keep-daily'] = subv.keep_daily
+    sub_dict['keep-weekly'] = subv.keep_weekly
+    sub_dict['keep-monthly'] = subv.keep_monthly
+    sub_dict['keep-yearly'] = subv.keep_yearly
+    sub_dict['snapshots'] = {}
+
+    # for snapshot in subvolume
+    for snp in subv:
+        snap_dict = {}
+        snap_dict['path'] = snp.path
+        snap_dict['creation-date-time'] = snp.creation_date_time.isoformat()
+        snap_dict['type'] = snp.type_
+
+        sub_dict['snapshots'][snp.name] = snap_dict
+
+    updated_config[subv.name] = sub_dict
+
 if os.path.exists(main_config_file_path):
     try:
         shutil.copy2(main_config_file_path, main_config_file_path + ".bak")
