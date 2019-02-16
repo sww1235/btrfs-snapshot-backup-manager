@@ -239,10 +239,35 @@ class Subvolume:
                                     )
                   )
 
-    def newest_snapshot(self):
-        """Return newest snapshot known to subvolume."""
+    def newest_snapshot(self, type_=None):
+        """Return newest snapshot known to subvolume.
+
+        If type is not none, return newest snapshot of type known to subvolume.
+        """
         self.sort()  # make sure list of snapshots is sorted asending
-        return self._snapshots[-1]  # return last (newest) snapshot in list
+        if type_:
+            # create a new list with just type_ snapshots in order
+            sublist = [snapshot for snapshot in self._snapshots
+                       if snapshot.type_ == type_]
+            sublist.sort()
+            return sublist[-1]  # return last (newest) snapshot of type in list
+        else:
+            return self._snapshots[-1]  # return last (newest) snapshot in list
+
+    def oldest_snapshot(self, type_=None):
+        """Return oldest snapshot known to subvolume.
+
+        If type is not none, return oldest snapshot of type known to subvolume.
+        """
+        self.sort()  # make sure list of snapshots is sorted asending
+        if type_:
+            # create a new list with just type_ snapshots in order
+            sublist = [snapshot for snapshot in self._snapshots
+                       if snapshot.type_ == type_]
+            sublist.sort()
+            return sublist[0]  # return first (oldest) snapshot of type in list
+        else:
+            return self._snapshots[0]  # return first (oldest) snapshot in list
 
     def sort(self):
         """Sort snapshots in Subvolume."""
