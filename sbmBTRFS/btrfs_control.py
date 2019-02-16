@@ -275,8 +275,8 @@ class Subvolume:
 
 
 @total_ordering  # add extra comparison operators
-class Snapshot(Subvolume):
-    """Represents a btrfs snapshot, which is a special case of subvolume."""
+class Snapshot():
+    """Represents a btrfs snapshot."""
 
     def __init__(self, name, path, type_, creation_date_time,
                  subvolume, read_only):
@@ -287,14 +287,12 @@ class Snapshot(Subvolume):
         self.creation_date_time = creation_date_time
         self.read_only = read_only
         self.subvolume = subvolume
-        self._snapshots = None  # don't want snapshots of snapshots
         # if the snapshot physically exists, otherwise mark as non physical
         # and log
         if self.exists(self.path):
             self.physical = True
         else:
             self.physical = False
-        super().__init__(self)  # add instance variables from superclass
 
     def __repr__(self):
         """Return string representation of class."""
@@ -357,14 +355,7 @@ class Snapshot(Subvolume):
                           f"Did not exist on disk."
                           )
 
-    def btrfs_take_snapshot(self, dest, ro):
-        """Don't want snapshots of snapshots."""
-        logging.error(f"No snapshots of snapshots plox. {self.name}"
-                      f"is a snapshot. This is an error"
-                      )
-        return None
-
-    def btrfs_snapshot_diff_check(self, new):
+    def snapshot_diff_check(self, new):
         """Check if there is a difference between two snapshots (Subvolumes).
 
         Keyword arguments:
