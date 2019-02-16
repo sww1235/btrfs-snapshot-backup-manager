@@ -14,9 +14,8 @@ import toml
 
 import btrfs_control as btrfs
 
-# TODO: refactor code with classes for snapshots and subvolumes.
 # TODO: add b2 file as well.
-# TODO: add init, requirements.txt and main stuff.
+# TODO: add main stuff.
 # TODO: add command to show snapshot diff changes.
 
 # TODO: provide a mechanism to list all snapshot diffs on server, and list
