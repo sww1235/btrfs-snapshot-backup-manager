@@ -117,11 +117,9 @@ class Subvolume:
             subprocess.run(["btrfs", "subvolume", "create", path],
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
-            logging.info(return_val.stdout)
+            logging.debug(return_val.stdout)
             logging.error(return_val.stderr)
         logging.info(f"Creating new subvolume at {path}")
-        subvolume_name = os.path.basename(os.path.normpath(path))
-        return cls(self.path, subvolume_name)
 
     @classmethod
     def delete(cls, path):
@@ -137,7 +135,7 @@ class Subvolume:
                 subprocess.run(["btrfs", "subvolume", "delete", path],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
-                logging.info(return_val.stdout)
+                logging.debug(return_val.stdout)
                 logging.error(return_val.stderr)
             logging.info(f"Deleting subvolume at {path}")
 
@@ -199,7 +197,7 @@ class Subvolume:
                              )
             if not TESTING:
                 # log stdout and stderr from btrfs commands
-                logging.info(return_val.stdout)
+                logging.debug(return_val.stdout)
                 logging.error(return_val.stderr)
             temp_snapshot = Snapshot(snapshot_name, snapshot_path, type_,
                                      time_now, self, ro
@@ -326,7 +324,7 @@ class Snapshot(Subvolume):
                 subprocess.run(["btrfs", "subvolume", "delete", self.path],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
-                logging.info(return_val.stdout)
+                logging.debug(return_val.stdout)
                 logging.error(return_val.stderr)
             logging.info(f"Deleting snapshot at {self.path}")
         else:
@@ -376,7 +374,7 @@ class Snapshot(Subvolume):
                                 diff_filepath, new.path],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
-                logging.info(return_val.stdout)
+                logging.debug(return_val.stdout)
                 logging.error(return_val.stderr)
             logging.info(f"Sending difference between {self.name} and "
                          f"{new.name} to {diff_filepath}"
@@ -391,7 +389,7 @@ class Snapshot(Subvolume):
                                self.path],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
-                logging.info(return_val.stdout)
+                logging.debug(return_val.stdout)
                 logging.error(return_val.stderr)
             logging.info(f"Sending {self.name} to {diff_filepath}")
 
