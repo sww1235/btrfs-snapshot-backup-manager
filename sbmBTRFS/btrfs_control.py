@@ -221,13 +221,13 @@ class Subvolume:
         snapshot.delete()
         self._snapshots.remove(snapshot)
 
-    def append_snapshot(self, snaphot):
+    def append_snapshot(self, snapshot):
         """Append precreated snapshot object to list of snapshots.
 
         currently only used when reading existing config file
         """
         self._snapshots.append(snapshot)
-        self.num_snapshots[snaphot.type_] += 1
+        self.num_snapshots[snapshot.type_] += 1
 
     def list_snapshots(self):
         """List snapshots in Subvolume with index."""
