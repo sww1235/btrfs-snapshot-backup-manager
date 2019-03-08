@@ -3,7 +3,7 @@
 import os.path
 import subprocess  # Calling btrfs commands
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from functools import total_ordering  # help with sorting methods
 
 # TODO: remove in production version
