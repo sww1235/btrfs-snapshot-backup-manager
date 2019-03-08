@@ -117,9 +117,10 @@ class Subvolume:
         if TESTING:
             print(f"btrfs subvolume create {path}")
         else:
-            subprocess.run(["btrfs", "subvolume", "create", path],
-                           stdout=subprocess.PIPE,
-                           stderr=subprocess.PIPE)
+            return_val = subprocess.run(
+                        ["btrfs", "subvolume", "create", path],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE)
             logger.debug(return_val.stdout)
             logger.error(return_val.stderr)
         logger.info(f"Creating new subvolume at {path}")
@@ -135,9 +136,10 @@ class Subvolume:
             if TESTING:
                 print(f"btrfs subvolume delete {path}")
             else:
-                subprocess.run(["btrfs", "subvolume", "delete", path],
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
+                return_val = subprocess.run(
+                            ["btrfs", "subvolume", "delete", path],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
                 logger.debug(return_val.stdout)
                 logger.error(return_val.stderr)
             logger.info(f"Deleting subvolume at {path}")
@@ -347,9 +349,10 @@ class Snapshot():
             if TESTING:
                 print(f"btrfs subvolume delete {self.path}")
             else:
-                subprocess.run(["btrfs", "subvolume", "delete", self.path],
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
+                return_val = subprocess.run(
+                            ["btrfs", "subvolume", "delete", self.path],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
                 logger.debug(return_val.stdout)
                 logger.error(return_val.stderr)
             logger.info(f"Deleting snapshot at {self.path}")
@@ -389,10 +392,11 @@ class Snapshot():
                       f"{new.path}"
                       )
             else:
-                subprocess.run(["btrfs", "send", "-p", self.path, "-f",
+                return_val = subprocess.run(
+                            ["btrfs", "send", "-p", self.path, "-f",
                                 diff_filepath, new.path],
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
                 logger.debug(return_val.stdout)
                 logger.error(return_val.stderr)
             logger.info(f"Sending difference between {self.name} and "
