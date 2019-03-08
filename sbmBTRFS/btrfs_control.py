@@ -2,12 +2,15 @@
 
 import os.path
 import subprocess  # Calling btrfs commands
+import logging
 from datetime import datetime, timedelta
 from functools import total_ordering  # help with sorting methods
 
 # TODO: remove in production version
 TESTING = True
 
+# Setup module based logging, attaches to logger from parent module
+logger = logging.getLogger(__name__)
 
 # TODO: Need to capture errors from btrfs commands as exceptions
 # TODO: Change snapshot type into an enum
@@ -99,7 +102,7 @@ class Subvolume:
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.PIPE)
             if return_val.returncode != 0:
-                logging.error(return_val.stderr)
+                logger.error(return_val.stderr)
                 return False
             else:
                 return True
@@ -117,9 +120,9 @@ class Subvolume:
             subprocess.run(["btrfs", "subvolume", "create", path],
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
-            logging.debug(return_val.stdout)
-            logging.error(return_val.stderr)
-        logging.info(f"Creating new subvolume at {path}")
+            logger.debug(return_val.stdout)
+            logger.error(return_val.stderr)
+        logger.info(f"Creating new subvolume at {path}")
 
     @classmethod
     def delete(cls, path):
@@ -135,14 +138,14 @@ class Subvolume:
                 subprocess.run(["btrfs", "subvolume", "delete", path],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
-                logging.debug(return_val.stdout)
-                logging.error(return_val.stderr)
-            logging.info(f"Deleting subvolume at {path}")
+                logger.debug(return_val.stdout)
+                logger.error(return_val.stderr)
+            logger.info(f"Deleting subvolume at {path}")
 
         else:
-            logging.error(f"Could not delete subvolume at {path}."
-                          f"Did not exist on disk"
-                          )
+            logger.error(f"Could not delete subvolume at {path}."
+                         f"Did not exist on disk"
+                         )
 
     def take_snapshot(self, type_, ro=True):
         """Take a snapshot of a btrfs subvolume.
@@ -178,9 +181,9 @@ class Subvolume:
                             self.path, snapshot_path],
                         stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE)
-                logging.info(f"Taking new read only snapshot of "
-                             f"{self.path} at {snapshot_path}"
-                             )
+                logger.info(f"Taking new read only snapshot of "
+                            f"{self.path} at {snapshot_path}"
+                            )
             else:
                 if TESTING:
                     print(f"btrfs subvolume snapshot "
@@ -192,13 +195,13 @@ class Subvolume:
                             snapshot_path],
                         stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE)
-                logging.info(f"Taking new snapshot of {self.path} "
-                             f"at {snapshot_path}"
-                             )
+                logger.info(f"Taking new snapshot of {self.path} "
+                            f"at {snapshot_path}"
+                            )
             if not TESTING:
                 # log stdout and stderr from btrfs commands
-                logging.debug(return_val.stdout)
-                logging.error(return_val.stderr)
+                logger.debug(return_val.stdout)
+                logger.error(return_val.stderr)
             temp_snapshot = Snapshot(snapshot_name, snapshot_path, type_,
                                      time_now, self, ro
                                      )
@@ -206,9 +209,9 @@ class Subvolume:
             self.num_snapshots[type_] += 1
             return temp_snapshot
         else:
-            logging.error(f"subvolume {self.name} does not exist on disk. "
-                          f"Cannot take snapshot!"
-                          )
+            logger.error(f"subvolume {self.name} does not exist on disk. "
+                         f"Cannot take snapshot!"
+                         )
 
     def delete_snapshot(self, snapshot):
         """Delete snapshot from subvolume list."""
@@ -329,7 +332,7 @@ class Snapshot():
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.PIPE)
             if return_val.returncode != 0:
-                logging.error(return_val.stderr)
+                logger.error(return_val.stderr)
                 return False
             else:
                 return True
@@ -347,13 +350,13 @@ class Snapshot():
                 subprocess.run(["btrfs", "subvolume", "delete", self.path],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
-                logging.debug(return_val.stdout)
-                logging.error(return_val.stderr)
-            logging.info(f"Deleting snapshot at {self.path}")
+                logger.debug(return_val.stdout)
+                logger.error(return_val.stderr)
+            logger.info(f"Deleting snapshot at {self.path}")
         else:
-            logging.error(f"Could not delete snapshot at {self.path}."
-                          f"Did not exist on disk."
-                          )
+            logger.error(f"Could not delete snapshot at {self.path}."
+                         f"Did not exist on disk."
+                         )
 
     def snapshot_diff_check(self, new):
         """Check if there is a difference between two snapshots (Subvolumes).
@@ -390,11 +393,11 @@ class Snapshot():
                                 diff_filepath, new.path],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
-                logging.debug(return_val.stdout)
-                logging.error(return_val.stderr)
-            logging.info(f"Sending difference between {self.name} and "
-                         f"{new.name} to {diff_filepath}"
-                         )
+                logger.debug(return_val.stdout)
+                logger.error(return_val.stderr)
+            logger.info(f"Sending difference between {self.name} and "
+                        f"{new.name} to {diff_filepath}"
+                        )
         elif self.physical:
             diff_filename = "init" + "::" + self.name
             diff_filepath = os.path.join(tmp_path, diff_filename)
@@ -405,8 +408,8 @@ class Snapshot():
                                self.path],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
-                logging.debug(return_val.stdout)
-                logging.error(return_val.stderr)
-            logging.info(f"Sending {self.name} to {diff_filepath}")
+                logger.debug(return_val.stdout)
+                logger.error(return_val.stderr)
+            logger.info(f"Sending {self.name} to {diff_filepath}")
 
         return filepath  # return path of snapshot diff
