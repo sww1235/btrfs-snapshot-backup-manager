@@ -82,7 +82,7 @@ class Subvolume:
         return (self.name == other.name)
 
     def __lt__(self, other):
-        """Check if Subvolumes are less than another subvolume.
+        """Check if subvolume is less than another subvolume.
 
         Sorts based on name.
         """
