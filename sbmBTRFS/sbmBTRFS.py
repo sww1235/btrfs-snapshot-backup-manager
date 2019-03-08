@@ -6,7 +6,6 @@ import fcntl  # lock files
 import logging
 import os.path
 import shutil  # config file backups
-import subprocess
 import sys
 from datetime import datetime, timedelta
 
@@ -249,7 +248,7 @@ if main_configuration:  # empty dict evaluates as false
 
     # creating subvolume and snapshot objects
     # for string, dict
-    for subvolume, contents in main_config.items():
+    for subvolume, contents in main_configuration.items():
         sub_name = subvolume
         sub_path = contents['path']
         snapshots_subvol = contents['snapshots-subvol']
@@ -268,7 +267,7 @@ if main_configuration:  # empty dict evaluates as false
                                  data['creation-date-time'])
             type_ = data['type']
             temp_snapshot = btrfs.Snapshot(snapshot, path, type_,
-                                           creation_date_time, self, True
+                                           creation_date_time, temp_sub, True
                                            )
             temp_sub.append_snapshot(temp_snapshot)
         temp_sub.sort()  # make sure all snapshots are ordered by creation date
