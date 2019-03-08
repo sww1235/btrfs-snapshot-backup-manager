@@ -384,7 +384,7 @@ class Snapshot():
         if new and new.physical and self.physical:
             diff_filename = (self.name + "::" + new.name)
             diff_filepath = os.path.join(tmp_path, diff_filename)
-            if testing:
+            if TESTING:
                 print(f"btrfs send -p {self.path} -f {diff_filepath} "
                       f"{new.path}"
                       )
@@ -401,7 +401,7 @@ class Snapshot():
         elif self.physical:
             diff_filename = "init" + "::" + self.name
             diff_filepath = os.path.join(tmp_path, diff_filename)
-            if testing:
+            if TESTING:
                 print(f"btrfs send -f {diff_filepath} {self.path}")
             else:
                 subprocess.run(["btrfs", "send", "-f", diff_filepath,
