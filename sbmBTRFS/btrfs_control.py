@@ -132,7 +132,7 @@ class Subvolume:
         Uses btrfs-progs subvolume command to delete a subvolume. Cannot
         recursively delete subvolumes. Only used to delete .snapshots subvolume
         """
-        if self.physical:
+        if cls.physical:
             if TESTING:
                 print(f"btrfs subvolume delete {path}")
             else:
